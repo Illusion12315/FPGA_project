@@ -55,7 +55,7 @@ module e_load_wrapper #(
     output wire                     vmod_l_sw_o         ,//Vmod_H/L_SW_FPGA
     output wire                     vsense_l_sw_o       ,//Vsense_H/L_SW_FPGA
 //并机控制
-    input  wire                     i_mcu_alarm         ,//axi_gpio
+    input  wire                     mcu_alarm_i         ,//axi_gpio
     input  wire                     i_mcu_syn           ,//axi_gpio
     inout  wire                     io_trig1            ,
     inout  wire                     io_trig2            ,
@@ -297,30 +297,30 @@ module e_load_wrapper #(
     reg                [32-1: 0]    Cap2_H              ;
     reg                [32-1: 0]    Tpro_L              ;
     reg                [32-1: 0]    Tpro_H              ;
-    reg                [32-1: 0]    temperature_0       ;
-    reg                [32-1: 0]    temperature_1       ;
-    reg                [32-1: 0]    temperature_2       ;
-    reg                [32-1: 0]    temperature_3       ;
-    reg                [32-1: 0]    temperature_4       ;
-    reg                [32-1: 0]    temperature_5       ;
-    reg                [32-1: 0]    temperature_6       ;
-    reg                [32-1: 0]    temperature_7       ;
-    reg                [32-1: 0]    SUM_UNIT_0          ;
-    reg                [32-1: 0]    SUM_UNIT_1          ;
-    reg                [32-1: 0]    SUM_UNIT_2          ;
-    reg                [32-1: 0]    SUM_UNIT_3          ;
-    reg                [32-1: 0]    SUM_UNIT_4          ;
-    reg                [32-1: 0]    SUM_UNIT_5          ;
-    reg                [32-1: 0]    SUM_UNIT_6          ;
-    reg                [32-1: 0]    SUM_UNIT_7          ;
-    reg                [32-1: 0]    BOARD_UNIT_0        ;
-    reg                [32-1: 0]    BOARD_UNIT_1        ;
-    reg                [32-1: 0]    BOARD_UNIT_2        ;
-    reg                [32-1: 0]    BOARD_UNIT_3        ;
-    reg                [32-1: 0]    BOARD_UNIT_4        ;
-    reg                [32-1: 0]    BOARD_UNIT_5        ;
-    reg                [32-1: 0]    BOARD_UNIT_6        ;
-    reg                [32-1: 0]    BOARD_UNIT_7        ;
+    wire               [32-1: 0]    temperature_0       ;
+    wire               [32-1: 0]    temperature_1       ;
+    wire               [32-1: 0]    temperature_2       ;
+    wire               [32-1: 0]    temperature_3       ;
+    wire               [32-1: 0]    temperature_4       ;
+    wire               [32-1: 0]    temperature_5       ;
+    wire               [32-1: 0]    temperature_6       ;
+    wire               [32-1: 0]    temperature_7       ;
+    wire               [32-1: 0]    SUM_UNIT_0          ;
+    wire               [32-1: 0]    SUM_UNIT_1          ;
+    wire               [32-1: 0]    SUM_UNIT_2          ;
+    wire               [32-1: 0]    SUM_UNIT_3          ;
+    wire               [32-1: 0]    SUM_UNIT_4          ;
+    wire               [32-1: 0]    SUM_UNIT_5          ;
+    wire               [32-1: 0]    SUM_UNIT_6          ;
+    wire               [32-1: 0]    SUM_UNIT_7          ;
+    wire               [32-1: 0]    BOARD_UNIT_0        ;
+    wire               [32-1: 0]    BOARD_UNIT_1        ;
+    wire               [32-1: 0]    BOARD_UNIT_2        ;
+    wire               [32-1: 0]    BOARD_UNIT_3        ;
+    wire               [32-1: 0]    BOARD_UNIT_4        ;
+    wire               [32-1: 0]    BOARD_UNIT_5        ;
+    wire               [32-1: 0]    BOARD_UNIT_6        ;
+    wire               [32-1: 0]    BOARD_UNIT_7        ;
     reg                [32-1: 0]    Version_number      ;
 
 
@@ -407,10 +407,20 @@ module e_load_wrapper #(
 
     assign                          T1                 = {T1_H_cc[15:0],T1_L_cc[15:0]};
     assign                          T2                 = {T2_H_cc[15:0],T2_L_cc[15:0]};
+
+
+    assign                          temperature_0      = ch0_temp_i;
+    assign                          temperature_1      = ch1_temp_i;
+    assign                          temperature_2      = ch2_temp_i;
+    assign                          temperature_3      = ch3_temp_i;
+    assign                          temperature_4      = ch4_temp_i;
+    assign                          temperature_5      = ch5_temp_i;
+    assign                          temperature_6      = ch6_temp_i;
+    assign                          temperature_7      = ch7_temp_i;
 //报警信息
     assign                          rd_Fault_status    = {
         5'd0, 1'b0/*TOPP_stop*/, 1'b0/*TOCP_stop*/, 1'b0/*电池*/, sense_error, (Umod_inv_alarm | Usense_inv_alarm),
-        i_mcu_alarm, ovp_maxU_alarm, ocp_alarm, ocp_maxI_alarm, opp_alarm, opp_maxP_alarm
+        mcu_alarm_i, ovp_maxU_alarm, ocp_alarm, ocp_maxI_alarm, opp_alarm, opp_maxP_alarm
     };
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
@@ -496,14 +506,14 @@ adc_Volt_Curr_Cali_wrapper#(
     .adc_cali_valid_o               (adc_cali_valid     ),
     .U_cali_o                       (U_cali             ),// 电压，校准后的值
     .I_cali_o                       (I_cali             ),// 电流，校准后的值
-    .Umod_cali_o                    (Umod_cali          ),//端口电压，校准后的值
-    .Usense_cali_o                  (Usense_cali        ),//Sense电流，校准后的值
-    .I_board_L_cali_o               (I_board_L_cali     ),//borad 低档电流，校准后的值
-    .I_board_H_cali_o               (I_board_H_cali     ),//board 高档电流，校准后的值
-    .I_sum_L_cali_o                 (I_sum_L_cali       ),//sum 低档电流，校准后的值
-    .I_sum_H_cali_o                 (I_sum_H_cali       ),//sum 高档电流，校准后的值
-    .I_sum_unit_cali_o              (I_sum_unit_cali    ),//sum_unit电流，校准后的值
-    .I_board_unit_cali_o            (I_board_unit_cali  ),//board_unit电流，校准后的值
+    .Umod_cali_o                    (Umod_cali          ),// 端口电压，校准后的值
+    .Usense_cali_o                  (Usense_cali        ),// Sense电流，校准后的值
+    .I_board_L_cali_o               (I_board_L_cali     ),// borad 低档电流，校准后的值
+    .I_board_H_cali_o               (I_board_H_cali     ),// board 高档电流，校准后的值
+    .I_sum_L_cali_o                 (I_sum_L_cali       ),// sum 低档电流，校准后的值
+    .I_sum_H_cali_o                 (I_sum_H_cali       ),// sum 高档电流，校准后的值
+    .I_sum_unit_cali_o              (I_sum_unit_cali    ),// sum_unit电流，校准后的值
+    .I_board_unit_cali_o            (I_board_unit_cali  ),// board_unit电流，校准后的值
     .U_cali_abs_o                   (U_cali_abs         ),// 电压，校准后的绝对值
     .I_cali_abs_o                   (I_cali_abs         ) // 电流，校准后的绝对值
 );
@@ -780,6 +790,36 @@ u_alarm_wrapper(
 // 
 //---------------------------------------------------------------------
 
+get_I_unit#(
+    .CALCULATE_WIDTH                (CALCULATE_WIDTH    ) 
+)
+u_get_I_unit(
+    .sys_clk_i                      (sys_clk_i          ),
+    .rst_n_i                        (rst_n_i            ),
+    .global_1us_flag_i              (global_1us_flag    ),
+// ADC signal
+    .adc_valid_i                    (adc_cali_valid     ),
+    .I_sum_unit_i                   (I_sum_unit_cali    ),// sum_unit电流，校准后的值
+    .I_board_unit_i                 (I_board_unit_cali  ),// board_unit电流，校准后的值
+    .SUM_UNIT_0                     (SUM_UNIT_0         ),
+    .SUM_UNIT_1                     (SUM_UNIT_1         ),
+    .SUM_UNIT_2                     (SUM_UNIT_2         ),
+    .SUM_UNIT_3                     (SUM_UNIT_3         ),
+    .SUM_UNIT_4                     (SUM_UNIT_4         ),
+    .SUM_UNIT_5                     (SUM_UNIT_5         ),
+    .SUM_UNIT_6                     (SUM_UNIT_6         ),
+    .SUM_UNIT_7                     (SUM_UNIT_7         ),
+    .BOARD_UNIT_0                   (BOARD_UNIT_0       ),
+    .BOARD_UNIT_1                   (BOARD_UNIT_1       ),
+    .BOARD_UNIT_2                   (BOARD_UNIT_2       ),
+    .BOARD_UNIT_3                   (BOARD_UNIT_3       ),
+    .BOARD_UNIT_4                   (BOARD_UNIT_4       ),
+    .BOARD_UNIT_5                   (BOARD_UNIT_5       ),
+    .BOARD_UNIT_6                   (BOARD_UNIT_6       ),
+    .BOARD_UNIT_7                   (BOARD_UNIT_7       ),
+    .en_sample_o                    (en_sample_o        ),
+    .sel_sample_o                   (sel_sample_o       ) 
+);
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
