@@ -93,7 +93,7 @@ module    e_load_wrapper_tb();
             #10
             rst_n_i = 1   ;
             #100
-            write_regs(32'h007,  32'h0);                            //æ¸…æ¥šå‘Šè­¦
+            write_regs(32'h007,  32'h0);                            //Çå³þ¸æ¾¯
             AD_Vmod   = 'hFDE4;
             AD_Vsense = 'hFDE4;                                      //2A
             I_SUM_H_AD    = 0;
@@ -107,14 +107,14 @@ module    e_load_wrapper_tb();
             I_BOARD_H_AD  = 0;
             I_SUM_L_AD  = 0;
             I_BOARD_L_AD= 0;
-            write_regs(32'h007,  32'h5a5a);                            //æ¸…æ¥šå‘Šè­¦
+            write_regs(32'h007,  32'h5a5a);                            //Çå³þ¸æ¾¯
             static_cc_test();
             write_regs(32'h001,  16'h005a);                         //CP
             write_regs(32'h002,  16'h5a00);                         //static
             write_regs(32'h017,  16'd10000);                        // Rset 5000m
             write_regs(32'h00B,  16'd1000);                         // sr
             write_regs(32'h00C,  16'd1000);                         // sf
-            write_regs(32'h007,  32'h0);                            //æ¸…æ¥šå‘Šè­¦
+            write_regs(32'h007,  32'h0);                            //Çå³þ¸æ¾¯
             #1000
             write_regs(32'h008,  32'h5a5a);
 
@@ -129,7 +129,7 @@ task static_cp_test;
         write_regs(32'h015,  16'd50000);                        // Pset 50000Mw
         write_regs(32'h00B,  16'd1000);                         // sr
         write_regs(32'h00C,  16'd1000);                         // sf
-        write_regs(32'h007,  32'h0);                            //æ¸…æ¥šå‘Šè­¦
+        write_regs(32'h007,  32'h0);                            //Çå³þ¸æ¾¯
         #1000
         write_regs(32'h008,  32'h5a5a);
         #3000_000
@@ -144,7 +144,7 @@ task static_cc_test;
         write_regs(32'h011,  16'd2000);                             // iset 2A 
         write_regs(32'h00B,  16'd1000);                             // sr
         write_regs(32'h00C,  16'd1000);                             // sf
-        write_regs(32'h007,  32'h0);                                //æ¸…æ¥šå‘Šè­¦
+        write_regs(32'h007,  32'h0);                                //Çå³þ¸æ¾¯
         #1000
         write_regs(32'h008,  32'h5a5a);
         #3000_000
@@ -162,7 +162,7 @@ endtask
         end
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// ADCè¾“å…¥
+// ADCÊäÈë
 //---------------------------------------------------------------------
 always@(posedge sys_clk_i)begin
     I_SUM_UNIT_AD   <= I_SUM_H_AD;
@@ -204,14 +204,14 @@ e_load_wrapper#(
     .rst_n_i                        (rst_n_i            ),
     // ADC signal
     .adc_acq_valid_i                (adc_acq_valid_i    ),
-    .I_SUM_H_AD                     (I_SUM_H_AD         ),// I_SUM_H_AD----é«˜æ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ4.521V
-    .I_SUM_L_AD                     (I_SUM_L_AD         ),// I_SUM_L_AD----ä½Žæ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ
-    .I_BOARD_H_AD                   (I_BOARD_H_AD       ),// I_BOARD_H_AD----é«˜æ¡£ä½æ¿å¡ç”µæµ4.5V
-    .I_BOARD_L_AD                   (I_BOARD_L_AD       ),// I_BOARD_L_AD----ä½Žæ¡£ä½æ¿å¡ç”µæµ
-    .AD_Vmod                        (AD_Vmod            ),// AD_Vmod----éžsenseç«¯ç”µåŽ‹
-    .AD_Vsense                      (AD_Vsense          ),// AD_Vsense----senseç«¯ç”µåŽ‹
-    .I_SUM_UNIT_AD                  (I_SUM_UNIT_AD      ),// I_SUM_UNIT_AD----å•æ¿å¡24æ¨¡å—æ±‡æ€»ç”µæµ4.125V
-    .I_BOARD_UNIT_AD                (I_BOARD_UNIT_AD    ),// I_BOARD_UNIT_AD----å•æ¿å¡å•æ¨¡å—ç”µæµ3.4375V
+    .I_SUM_H_AD                     (I_SUM_H_AD         ),// I_SUM_H_AD----¸ßµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷4.521V
+    .I_SUM_L_AD                     (I_SUM_L_AD         ),// I_SUM_L_AD----µÍµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷
+    .I_BOARD_H_AD                   (I_BOARD_H_AD       ),// I_BOARD_H_AD----¸ßµµÎ»°å¿¨µçÁ÷4.5V
+    .I_BOARD_L_AD                   (I_BOARD_L_AD       ),// I_BOARD_L_AD----µÍµµÎ»°å¿¨µçÁ÷
+    .AD_Vmod                        (AD_Vmod            ),// AD_Vmod----·Çsense¶ËµçÑ¹
+    .AD_Vsense                      (AD_Vsense          ),// AD_Vsense----sense¶ËµçÑ¹
+    .I_SUM_UNIT_AD                  (I_SUM_UNIT_AD      ),// I_SUM_UNIT_AD----µ¥°å¿¨24Ä£¿é»ã×ÜµçÁ÷4.125V
+    .I_BOARD_UNIT_AD                (I_BOARD_UNIT_AD    ),// I_BOARD_UNIT_AD----µ¥°å¿¨µ¥Ä£¿éµçÁ÷3.4375V
     // DAC signal
     .dac_ch1_en_o                   (dac_ch1_en_o       ),
     .dac_ch1_data_o                 (dac_ch1_data_o     ),

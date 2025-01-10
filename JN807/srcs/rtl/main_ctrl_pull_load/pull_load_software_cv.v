@@ -16,39 +16,39 @@
 module pull_load_software_cv #(
     parameter                       SIMULATION         = 0     ,
     parameter                       CALCULATE_WIDTH    = 24    ,
-    parameter                       RF_MAX_LIMIT       = 30_000_000,//æœ€å¤§ä¸Šå‡ä¸‹é™æ–œç‡é™åˆ¶ï¼Œå•ä½1mA/ms
-    parameter                       PRECHARGE_I        = 30    ,//MOSé¢„å……ç”µç”µæµ(mA)
+    parameter                       RF_MAX_LIMIT       = 30_000_000,//×î´óÉÏÉıÏÂ½µĞ±ÂÊÏŞÖÆ£¬µ¥Î»1mA/ms
+    parameter                       PRECHARGE_I        = 30    ,//MOSÔ¤³äµçµçÁ÷(mA)
     parameter                       AXI_REG_WIDTH      = 24    
 ) (
     input  wire                     sys_clk_i           ,
     input  wire                     rst_n_i             ,
 
-    input  wire        [CALCULATE_WIDTH-1: 0]Von_i      ,//å¼€å¯ç”µå‹mV
+    input  wire        [CALCULATE_WIDTH-1: 0]Von_i      ,//¿ªÆôµçÑ¹mV
 
     input  wire                     on_i                ,
     input  wire                     global_1us_flag_i   ,
-    input  wire signed [AXI_REG_WIDTH-1: 0]target_i     ,//ç›®æ ‡å€¼mV
-    input  wire signed [AXI_REG_WIDTH-1: 0]initI_i      ,//åˆå§‹ç”µæµå€¼mA
-    input  wire signed [AXI_REG_WIDTH-1: 0]limitI_i     ,//é™åˆ¶ç”µæµmA
-    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_i    ,//CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)
-    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_period_i,//CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)
-    input  wire        [AXI_REG_WIDTH-1: 0]SR_slew_i    ,//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    input  wire        [AXI_REG_WIDTH-1: 0]SF_slew_i    ,//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤ 
-    input  wire        [AXI_REG_WIDTH+20-1: 0]SR_slew_period_i,//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    input  wire        [AXI_REG_WIDTH+20-1: 0]SF_slew_period_i,//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
+    input  wire signed [AXI_REG_WIDTH-1: 0]target_i     ,//Ä¿±êÖµmV
+    input  wire signed [AXI_REG_WIDTH-1: 0]initI_i      ,//³õÊ¼µçÁ÷ÖµmA
+    input  wire signed [AXI_REG_WIDTH-1: 0]limitI_i     ,//ÏŞÖÆµçÁ÷mA
+    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_i    ,//CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)
+    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_period_i,//CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)
+    input  wire        [AXI_REG_WIDTH-1: 0]SR_slew_i    ,//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    input  wire        [AXI_REG_WIDTH-1: 0]SF_slew_i    ,//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤ 
+    input  wire        [AXI_REG_WIDTH+20-1: 0]SR_slew_period_i,//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    input  wire        [AXI_REG_WIDTH+20-1: 0]SF_slew_period_i,//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
 
-    input  wire                     Short_flag_i        ,//çŸ­è·¯æµ‹è¯• (STA/DYN)
-    input  wire        [AXI_REG_WIDTH-1: 0]I_short_i    ,//çŸ­è·¯æ—¶æ‹‰è½½ç”µæµ    
+    input  wire                     Short_flag_i        ,//¶ÌÂ·²âÊÔ (STA/DYN)
+    input  wire        [AXI_REG_WIDTH-1: 0]I_short_i    ,//¶ÌÂ·Ê±À­ÔØµçÁ÷    
 
     input  wire signed [  15: 0]    k_i                 ,
     input  wire signed [  15: 0]    b_i                 ,
-    input  wire signed [  15: 0]    KP_i                ,//æ¯”ä¾‹ç³»æ•°*2^16
-    input  wire signed [  15: 0]    KI_i                ,//ç§¯åˆ†ç³»æ•°*2^16
-    input  wire signed [  15: 0]    KD_i                ,//å¾®åˆ†ç³»æ•°*2^16
+    input  wire signed [  15: 0]    KP_i                ,//±ÈÀıÏµÊı*2^16
+    input  wire signed [  15: 0]    KI_i                ,//»ı·ÖÏµÊı*2^16
+    input  wire signed [  15: 0]    KD_i                ,//Î¢·ÖÏµÊı*2^16
     input  wire        [CALCULATE_WIDTH-1: 0]U_abs_i    ,//mV
     input  wire        [CALCULATE_WIDTH-1: 0]I_abs_i    ,//mV
     
-    output wire                     pull_on_doing_o     ,//è¡¨é¢å½“å‰æ­£åœ¨è¿›è¡Œç”µæµè¾“å‡ºæ§åˆ¶
+    output wire                     pull_on_doing_o     ,//±íÃæµ±Ç°ÕıÔÚ½øĞĞµçÁ÷Êä³ö¿ØÖÆ
 
     output reg                      dac_data_valid_o    ,
     output reg         [  15: 0]    dac_data_o          ,
@@ -70,7 +70,7 @@ module pull_load_software_cv #(
     reg                [AXI_REG_WIDTH+20-1: 0]cv_target_ext  ;
     reg                [AXI_REG_WIDTH-1: 0]cv_limit_temp  ;
     reg                [AXI_REG_WIDTH+20-1: 0]cv_limit_ext  ;
-    reg                [AXI_REG_WIDTH-1: 0]targetI      ;//ç›®æ ‡ç”µæµ
+    reg                [AXI_REG_WIDTH-1: 0]targetI      ;//Ä¿±êµçÁ÷
     reg                [AXI_REG_WIDTH-1: 0]target_ctrl_temp  ;
     reg                [AXI_REG_WIDTH+20-1: 0]target_ctrl_ext  ;
     wire               [AXI_REG_WIDTH-1: 0]target_ctrl  ;
@@ -82,8 +82,8 @@ module pull_load_software_cv #(
     reg                             short_state_add=0   ;
     reg                             on_state_add=0      ;
     
-    reg                [AXI_REG_WIDTH-1: 0]initU_cache  ;//åˆå§‹ç”µå‹å€¼mV
-    reg                [AXI_REG_WIDTH-1: 0]initI_cache  ;//åˆå§‹ç”µå‹å€¼mA
+    reg                [AXI_REG_WIDTH-1: 0]initU_cache  ;//³õÊ¼µçÑ¹ÖµmV
+    reg                [AXI_REG_WIDTH-1: 0]initI_cache  ;//³õÊ¼µçÑ¹ÖµmA
     reg                [AXI_REG_WIDTH-1: 0]pid_initI    ;//
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
@@ -150,9 +150,9 @@ always@(posedge sys_clk_i)begin
 end
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// æŒ‰ç…§æ–œç‡å’Œé€»è¾‘è¾“å‡º
+// °´ÕÕĞ±ÂÊºÍÂß¼­Êä³ö
 //---------------------------------------------------------------------
-//ç¼“å­˜onä¹‹å‰çš„åˆå§‹ç”µå‹
+//»º´æonÖ®Ç°µÄ³õÊ¼µçÑ¹
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
         initU_cache <= 'd0;
@@ -170,16 +170,16 @@ always@(posedge sys_clk_i)begin
         cv_target_ext  <= 'd0;
     end
     else if (on_i) begin
-        if (Short_flag_i) begin                                     //shortæ—¶ç”±LIMITæ§åˆ¶ï¼Œè¯¥å€¼ç»™åˆå€¼
+        if (Short_flag_i) begin                                     //shortÊ±ÓÉLIMIT¿ØÖÆ£¬¸ÃÖµ¸ø³õÖµ
             cv_target_temp <= initU_cache;
             cv_target_ext  <= {initU_cache, 20'b0};
         end
-        else if (short_state_add) begin                             //shorté‡Šæ”¾ä¹‹é™…æ¢å¤åˆå€¼
-            if (U_abs_i < Von_i && target_i > Von_i) begin          //å…³é—­shortåï¼ŒV_setè®¾ç½®ä¸ºVin+0.011V,é€šè¿‡CVç¯è·¯æ…¢æ…¢é‡Šæ”¾ç”µæµï¼Œ
+        else if (short_state_add) begin                             //shortÊÍ·ÅÖ®¼Ê»Ö¸´³õÖµ
+            if (U_abs_i < Von_i && target_i > Von_i) begin          //¹Ø±Õshortºó£¬V_setÉèÖÃÎªVin+0.011V,Í¨¹ıCV»·Â·ÂıÂıÊÍ·ÅµçÁ÷£¬
                 cv_target_temp <= initU_cache + 11;
                 cv_target_ext  <= {initU_cache + 11, 20'b0};
             end
-            else begin                                              //ä½¿å¾—Vinä¸Šå‡åˆ°Vonç‚¹å,å†ä»å½“å‰V_setæŒ‰ç…§æ–œç‡æ¢å¤åˆ°Vsetã€‚
+            else begin                                              //Ê¹µÃVinÉÏÉıµ½Vonµãºó,ÔÙ´Óµ±Ç°V_set°´ÕÕĞ±ÂÊ»Ö¸´µ½Vset¡£
             
                 if (time_1ms_flag && (cv_target_temp > (target_i + CV_slew_i)))
                     cv_target_temp <= cv_target_temp - CV_slew_i;
@@ -201,7 +201,7 @@ always@(posedge sys_clk_i)begin
 
             end
         end
-        else begin                                                  //onçš„çŠ¶æ€ä¸‹ï¼Œæ²¿ç€æ–œç‡æ§åˆ¶
+        else begin                                                  //onµÄ×´Ì¬ÏÂ£¬ÑØ×ÅĞ±ÂÊ¿ØÖÆ
             
             if (time_1ms_flag && (cv_target_temp > (target_i + CV_slew_i)))
                 cv_target_temp <= cv_target_temp - CV_slew_i;
@@ -223,11 +223,11 @@ always@(posedge sys_clk_i)begin
 
         end
     end
-    else if (on_state_add) begin                                    //oné‡Šæ”¾æ—¶ï¼Œç”±LIMITæ§åˆ¶
+    else if (on_state_add) begin                                    //onÊÍ·ÅÊ±£¬ÓÉLIMIT¿ØÖÆ
         cv_target_temp <= cv_target_temp;
         cv_target_ext  <= cv_target_ext;
     end
-    else begin                                                      //offçŠ¶æ€ä¸‹ï¼Œæ¢å¤åˆå€¼
+    else begin                                                      //off×´Ì¬ÏÂ£¬»Ö¸´³õÖµ
         cv_target_temp <= U_abs_i;
         cv_target_ext  <= {U_abs_i, 20'b0};
     end
@@ -240,15 +240,15 @@ always@(posedge sys_clk_i)begin
         cv_limit_temp <= 'd0;
         cv_limit_ext  <= 'd0;
     end
-    else if (on_i) begin                                            //å¼€æœºæ—¶ä¸ºè¾“å…¥å€¼
+    else if (on_i) begin                                            //¿ª»úÊ±ÎªÊäÈëÖµ
         cv_limit_temp <= limitI_i;
         cv_limit_ext  <= {limitI_i, 20'b0};
     end
-    else if (!on_i && on_r1) begin                                  //å…³æœºç¬é—´ï¼Œå…ˆæŠŠlimitæ‹‰å›å½“å‰è¾“å‡ºçš„å€¼
+    else if (!on_i && on_r1) begin                                  //¹Ø»úË²¼ä£¬ÏÈ°ÑlimitÀ­»Øµ±Ç°Êä³öµÄÖµ
         cv_limit_temp <= targetI;
         cv_limit_ext  <= {targetI, 20'b0};
     end
-    else if (on_state_add) begin                                    //å…³æœºåï¼Œæ²¿ç€æ–œç‡ä¸‹é™
+    else if (on_state_add) begin                                    //¹Ø»úºó£¬ÑØ×ÅĞ±ÂÊÏÂ½µ
         
         if (time_1ms_flag && (cv_limit_temp > (initI_cache + SF_slew_i)))
             cv_limit_temp <= cv_limit_temp - SF_slew_i;
@@ -269,7 +269,7 @@ always@(posedge sys_clk_i)begin
             cv_limit_ext <= {initI_cache ,20'b0};
 
     end
-    else begin                                                      //å®Œå…¨å…³é—­åï¼Œå›åˆ°åˆå€¼
+    else begin                                                      //ÍêÈ«¹Ø±Õºó£¬»Øµ½³õÖµ
         cv_limit_temp <= limitI_i;
         cv_limit_ext  <= {limitI_i, 20'b0};
     end
@@ -279,10 +279,10 @@ end
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// ç”µå‹ç¯
+// µçÑ¹»·
 //---------------------------------------------------------------------
 always@(posedge sys_clk_i)begin
-    if (Short_flag_i || short_state_add) begin                      //shortæ—¶éœ€æ”¹æˆå½“å‰é‡‡æ ·å€¼
+    if (Short_flag_i || short_state_add) begin                      //shortÊ±Ğè¸Ä³Éµ±Ç°²ÉÑùÖµ
         pid_initI <= I_abs_i;
     end
     else begin
@@ -298,7 +298,7 @@ PID_ctrl U_CH_PID_ctrl
     .i_gap                          ('d1                ),//input          
     .i_target                       (cv_target          ),//input  [23:0]  
     .i_limitI                       (cv_limit           ),//input  [23:0] 
-    .i_initI                        (pid_initI          ),//input  [23:0] shortæ—¶éœ€æ”¹æˆå½“å‰é‡‡æ ·å€¼
+    .i_initI                        (pid_initI          ),//input  [23:0] shortÊ±Ğè¸Ä³Éµ±Ç°²ÉÑùÖµ
     .i_x                            (U_abs_i            ),//input  [23:0]  
     .i_P                            (KP_i               ),//input  [15:0]  
     .i_I                            (KI_i               ),//input  [15:0]  
@@ -323,7 +323,7 @@ always@(posedge sys_clk_i)begin
         target_ctrl_ext  <= 'd0;
     end
     else if (on_i) begin
-        if (Short_flag_i) begin                                     //çŸ­è·¯æ¨¡å¼ä¸‹ï¼Œä»¥æœ€å¤§æ–œç‡æ‹‰åˆ°çŸ­è·¯ç”µæµé¢„è®¾å€¼
+        if (Short_flag_i) begin                                     //¶ÌÂ·Ä£Ê½ÏÂ£¬ÒÔ×î´óĞ±ÂÊÀ­µ½¶ÌÂ·µçÁ÷Ô¤ÉèÖµ
             
             if (time_1ms_flag && (target_ctrl_temp > (I_short_i + RF_MAX_LIMIT)))
                 target_ctrl_temp <= target_ctrl_temp - RF_MAX_LIMIT;
@@ -344,12 +344,12 @@ always@(posedge sys_clk_i)begin
                 target_ctrl_ext <= {I_short_i ,20'b0};
 
         end
-        else begin                                                  //å…¶ä»–æ¨¡å¼ä¸‹ï¼Œç”±ç”µå‹ç¯è·¯æ§åˆ¶
+        else begin                                                  //ÆäËûÄ£Ê½ÏÂ£¬ÓÉµçÑ¹»·Â·¿ØÖÆ
             target_ctrl_temp <= targetI;
             target_ctrl_ext  <= {targetI, 20'b0};
         end
     end
-    else begin                                                      //å…¶ä»–æ¨¡å¼ä¸‹ï¼Œç”±ç”µå‹ç¯è·¯æ§åˆ¶
+    else begin                                                      //ÆäËûÄ£Ê½ÏÂ£¬ÓÉµçÑ¹»·Â·¿ØÖÆ
         target_ctrl_temp <= targetI;
         target_ctrl_ext  <= {targetI, 20'b0};
     end

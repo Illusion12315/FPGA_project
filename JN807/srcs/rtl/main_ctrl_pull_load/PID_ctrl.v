@@ -4,7 +4,7 @@
 //                        Senior Engineer
 // Create Date          : 8:22 2024/9/9
 // Module Name          : PID_ctrl
-// Description          : PIDç®—æ³•
+// Description          : PIDËã·¨
 // ---- y[n] = P * E[n] + I * SUM (E[n]) + D * (E[n] - E[n-1])
 // Additional Comments  : 
 //////////////////////////////////////////////////////////////////////////////////
@@ -17,16 +17,16 @@ input                                   i_clk          ,//
 input                                   i_rst          ,// 
 		    
 input                                   i_gap          ,//1us
-input       signed      [23:0]          i_target       ,//ç›®æ ‡å€¼
-input       signed      [23:0]          i_limitI       ,//é™åˆ¶I//
-input       signed      [23:0]          i_initI        ,//åˆå§‹ç”µæµå€¼mA
-input       signed      [23:0]          i_x            ,//å½“å‰é‡‡æ ·å€¼
-input       signed      [15:0]          i_P            ,//æ¯”ä¾‹ç³»æ•°*2^15
-input       signed      [15:0]          i_I            ,//ç§¯åˆ†ç³»æ•°*2^15
-input       signed      [15:0]          i_D            ,//å¾®åˆ†ç³»æ•°*2^15
+input       signed      [23:0]          i_target       ,//Ä¿±êÖµ
+input       signed      [23:0]          i_limitI       ,//ÏŞÖÆI//
+input       signed      [23:0]          i_initI        ,//³õÊ¼µçÁ÷ÖµmA
+input       signed      [23:0]          i_x            ,//µ±Ç°²ÉÑùÖµ
+input       signed      [15:0]          i_P            ,//±ÈÀıÏµÊı*2^15
+input       signed      [15:0]          i_I            ,//»ı·ÖÏµÊı*2^15
+input       signed      [15:0]          i_D            ,//Î¢·ÖÏµÊı*2^15
                                 
-output                                  o_vld          ,//è¾“å‡ºæœ‰æ•ˆ
-output      signed      [23:0]          o_y             //è¾“å‡ºæ§åˆ¶å€¼
+output                                  o_vld          ,//Êä³öÓĞĞ§
+output      signed      [23:0]          o_y             //Êä³ö¿ØÖÆÖµ
 );
 reg     signed  [23:0]                  s_diff        =0 ;
 reg     signed  [23:0]                  s_diff_1dly   =0 ;
@@ -52,7 +52,7 @@ wire            [39:0]                  w_limitI_value ;
 
 assign  w_limitI_amp = {i_limitI,15'b0}; 
 
-//æ£€æµ‹è¢«é™¤æ•°ä¸º0
+//¼ì²â±»³ıÊıÎª0
 always @ (posedge i_clk)
 begin
     if (i_I == 'h0)
@@ -71,7 +71,7 @@ div_u64_u32 U_div_limitI_
     .m_axis_dout_tvalid          (           ), // output wire m_axis_dout_tvalid
     .m_axis_dout_tdata           ( w_limitI_amp_divI   ) // output wire [95 : 0] m_axis_dout_tdata
 );
-assign  w_limitI_value = w_limitI_amp_divI[63:24] + w_limitI_amp_divI[23] ^ w_limitI_amp_divI[63] ;//å››èˆäº”å…¥
+assign  w_limitI_value = w_limitI_amp_divI[63:24] + w_limitI_amp_divI[23] ^ w_limitI_amp_divI[63] ;//ËÄÉáÎåÈë
 
 wire            [39:0]                  w_initI_amp     ;
 wire            [63:0]                  w_initI_amp_divI ;
@@ -79,7 +79,7 @@ reg             [23:0]                  s_initI_divior   =1 ;
 wire            [39:0]                  w_initI_value ;
 
 assign  w_initI_amp = {i_initI,15'b0}; 
-//æ£€æµ‹è¢«é™¤æ•°ä¸º0
+//¼ì²â±»³ıÊıÎª0
 // always @ (posedge i_clk)
 // begin
     // if (i_I == 'h0)
@@ -98,7 +98,7 @@ div_u64_u32 U_div_initI_
     .m_axis_dout_tvalid          (           ), // output wire m_axis_dout_tvalid
     .m_axis_dout_tdata           ( w_initI_amp_divI   ) // output wire [95 : 0] m_axis_dout_tdata
 );
-assign  w_initI_value = w_initI_amp_divI[63:24] + w_initI_amp_divI[23] ^ w_initI_amp_divI[63] ;//å››èˆäº”å…¥
+assign  w_initI_value = w_initI_amp_divI[63:24] + w_initI_amp_divI[23] ^ w_initI_amp_divI[63] ;//ËÄÉáÎåÈë
 
 
 
@@ -167,7 +167,7 @@ trig_dly #(.DLY_CKNUM (4)) U_dly_out
 assign  o_y = s_out_temp ;
 
 //------------------------------------------------------------
-// æœ‰æ•ˆä½å®½
+// ÓĞĞ§Î»¿í
 //------------------------------------------------------------
 always @ (posedge i_clk)
 begin

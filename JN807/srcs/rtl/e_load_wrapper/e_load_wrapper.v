@@ -22,14 +22,14 @@ module e_load_wrapper #(
     input  wire                     rst_n_i             ,
     // ADC signal
     input  wire                     adc_acq_valid_i     ,
-    input  wire signed [  15: 0]    I_SUM_H_AD          ,//I_SUM_H_AD----é«˜æ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ4.521V
-    input  wire signed [  15: 0]    I_SUM_L_AD          ,//I_SUM_L_AD----ä½æ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ
-    input  wire signed [  15: 0]    I_BOARD_H_AD        ,//I_BOARD_H_AD----é«˜æ¡£ä½æ¿å¡ç”µæµ4.5V
-    input  wire signed [  15: 0]    I_BOARD_L_AD        ,//I_BOARD_L_AD----ä½æ¡£ä½æ¿å¡ç”µæµ
-    input  wire signed [  15: 0]    AD_Vmod             ,//AD_Vmod----ésenseç«¯ç”µå‹
-    input  wire signed [  15: 0]    AD_Vsense           ,//AD_Vsense----senseç«¯ç”µå‹
-    input  wire signed [  15: 0]    I_SUM_UNIT_AD       ,//I_SUM_UNIT_AD----å•æ¿å¡24æ¨¡å—æ±‡æ€»ç”µæµ4.125V
-    input  wire signed [  15: 0]    I_BOARD_UNIT_AD     ,//I_BOARD_UNIT_AD----å•æ¿å¡å•æ¨¡å—ç”µæµ3.4375V
+    input  wire signed [  15: 0]    I_SUM_H_AD          ,//I_SUM_H_AD----¸ßµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷4.521V
+    input  wire signed [  15: 0]    I_SUM_L_AD          ,//I_SUM_L_AD----µÍµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷
+    input  wire signed [  15: 0]    I_BOARD_H_AD        ,//I_BOARD_H_AD----¸ßµµÎ»°å¿¨µçÁ÷4.5V
+    input  wire signed [  15: 0]    I_BOARD_L_AD        ,//I_BOARD_L_AD----µÍµµÎ»°å¿¨µçÁ÷
+    input  wire signed [  15: 0]    AD_Vmod             ,//AD_Vmod----·Çsense¶ËµçÑ¹
+    input  wire signed [  15: 0]    AD_Vsense           ,//AD_Vsense----sense¶ËµçÑ¹
+    input  wire signed [  15: 0]    I_SUM_UNIT_AD       ,//I_SUM_UNIT_AD----µ¥°å¿¨24Ä£¿é»ã×ÜµçÁ÷4.125V
+    input  wire signed [  15: 0]    I_BOARD_UNIT_AD     ,//I_BOARD_UNIT_AD----µ¥°å¿¨µ¥Ä£¿éµçÁ÷3.4375V
     // GPIO CTRL
     output wire                     cv_sp_slow_o        ,
     output wire                     cv_sp_mid_o         ,
@@ -39,7 +39,7 @@ module e_load_wrapper #(
     output wire        [  15: 0]    dac_ch1_data_o      ,
     output wire                     dac_ch2_en_o        ,
     output wire        [  15: 0]    dac_ch2_data_o      ,
-//æ¸©åº¦é‡‡é›†å€¼
+//ÎÂ¶È²É¼¯Öµ
     input  wire        [  31: 0]    ch0_temp_i          ,
     input  wire        [  31: 0]    ch1_temp_i          ,
     input  wire        [  31: 0]    ch2_temp_i          ,
@@ -48,18 +48,18 @@ module e_load_wrapper #(
     input  wire        [  31: 0]    ch5_temp_i          ,
     input  wire        [  31: 0]    ch6_temp_i          ,
     input  wire        [  31: 0]    ch7_temp_i          ,
-//å•å…ƒç”µæµå€¼é€‰æ‹©
+//µ¥ÔªµçÁ÷ÖµÑ¡Ôñ
     output wire                     en_sample_o         ,
     output wire        [   2: 0]    sel_sample_o        ,
-//Vé«˜ä½æ¡£é‡‡æ ·åˆ‡æ¢å¼€å…³é»˜è®¤é«˜æ¡£ä½
+//V¸ßµÍµµ²ÉÑùÇĞ»»¿ª¹ØÄ¬ÈÏ¸ßµµÎ»
     output wire                     vmod_l_sw_o         ,//Vmod_H/L_SW_FPGA
     output wire                     vsense_l_sw_o       ,//Vsense_H/L_SW_FPGA
-//å¹¶æœºæ§åˆ¶
+//²¢»ú¿ØÖÆ
     input  wire                     mcu_alarm_i         ,//axi_gpio
     input  wire                     i_mcu_syn           ,//axi_gpio
     inout  wire                     io_trig1            ,
     inout  wire                     io_trig2            ,
-    output wire                     o_m_s               ,// master_slave flag 1:ä¸»æœº 0:ä»æœº
+    output wire                     o_m_s               ,// master_slave flag 1:Ö÷»ú 0:´Ó»ú
 	// User ports ends
     input  wire        [C_S_AXI_ADDR_WIDTH-1: 0]S_AXI_AWADDR,
     input  wire        [   2: 0]    S_AXI_AWPROT        ,
@@ -258,7 +258,7 @@ module e_load_wrapper #(
     wire               [32-1: 0]    Loops               ;
     wire               [32-1: 0]    Save_step           ;
 
-    wire               [16-1: 0]    rd_Fault_status     ;//0x200 é”™è¯¯çŠ¶æ€
+    wire               [16-1: 0]    rd_Fault_status     ;//0x200 ´íÎó×´Ì¬
     reg                [16-1: 0]    rd_Run_status       ;
     reg                [32-1: 0]    rd_TOCP_result      ;
     reg                [32-1: 0]    rd_TOPP_result      ;
@@ -331,7 +331,7 @@ module e_load_wrapper #(
     wire                            SENSE_ON            ;
     wire                            U_gear_H_ON         ;
     wire                            I_gear_H_ON         ;
-    wire                            I_sum_ON            ;//æ‹‰é«˜æ—¶åˆ‡æ¢åˆ°I_sumä½œä¸ºé‡‡æ ·ç”µæµï¼Œé»˜è®¤ä¸º0
+    wire                            I_sum_ON            ;//À­¸ßÊ±ÇĞ»»µ½I_sum×÷Îª²ÉÑùµçÁ÷£¬Ä¬ÈÏÎª0
     wire                            CV_mode_hard_ON     ;
 
     wire               [  31: 0]    Iset                ;
@@ -355,8 +355,8 @@ module e_load_wrapper #(
     wire               [  31: 0]    T1                  ;
     wire               [  31: 0]    T2                  ;
 
-    wire     signed    [  15: 0]    CV_k                ;//CVæ¨¡å¼K
-    wire     signed    [  15: 0]    CV_a                ;//CVæ¨¡å¼A
+    wire     signed    [  15: 0]    CV_k                ;//CVÄ£Ê½K
+    wire     signed    [  15: 0]    CV_a                ;//CVÄ£Ê½A
     
     wire               [  15: 0]    KP                  ;
     wire               [  15: 0]    KI                  ;
@@ -381,8 +381,8 @@ module e_load_wrapper #(
     assign                          SENSE_ON           = (SENSE == 16'ha5a5) ? 1'b1 : 1'b0;
     assign                          U_gear_H_ON        = (Vrange == 16'h5a5a) ? 1'b1 : 1'b0;
     assign                          I_sum_ON           = 0;
-    // assign                       I_gear_H_ON        = å•ç‹¬è®¾è®¡;//è‡ªåŠ¨åˆ‡æ¢æŒ¡ä½
-    assign                          CV_mode_hard_ON    = CV_mode[0];//è½¯ä»¶CVã€ç¡¬ä»¶CVé€‰æ‹©ï¼Œé»˜è®¤0ï¼Œè½¯ä»¶CV
+    // assign                       I_gear_H_ON        = µ¥¶ÀÉè¼Æ;//×Ô¶¯ÇĞ»»µ²Î»
+    assign                          CV_mode_hard_ON    = CV_mode[0];//Èí¼şCV¡¢Ó²¼şCVÑ¡Ôñ£¬Ä¬ÈÏ0£¬Èí¼şCV
 
     assign                          vmod_l_sw_o        = ~U_gear_H_ON;
     assign                          vsense_l_sw_o      = ~U_gear_H_ON;
@@ -417,9 +417,9 @@ module e_load_wrapper #(
     assign                          temperature_5      = ch5_temp_i;
     assign                          temperature_6      = ch6_temp_i;
     assign                          temperature_7      = ch7_temp_i;
-//æŠ¥è­¦ä¿¡æ¯
+//±¨¾¯ĞÅÏ¢
     assign                          rd_Fault_status    = {
-        5'd0, 1'b0/*TOPP_stop*/, 1'b0/*TOCP_stop*/, 1'b0/*ç”µæ± */, sense_error, (Umod_inv_alarm | Usense_inv_alarm),
+        5'd0, 1'b0/*TOPP_stop*/, 1'b0/*TOCP_stop*/, 1'b0/*µç³Ø*/, sense_error, (Umod_inv_alarm | Usense_inv_alarm),
         mcu_alarm_i, ovp_maxU_alarm, ocp_alarm, ocp_maxI_alarm, opp_alarm, opp_maxP_alarm
     };
 // ********************************************************************************** // 
@@ -431,25 +431,25 @@ module e_load_wrapper #(
     wire     signed    [CALCULATE_WIDTH-1: 0]I_cali     ;
     wire     signed    [CALCULATE_WIDTH-1: 0]Umod_cali  ;
     wire     signed    [CALCULATE_WIDTH-1: 0]Usense_cali  ;
-    wire     signed    [CALCULATE_WIDTH-1: 0]I_board_L_cali  ;//borad ä½æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    wire     signed    [CALCULATE_WIDTH-1: 0]I_board_H_cali  ;//board é«˜æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    wire     signed    [CALCULATE_WIDTH-1: 0]I_sum_L_cali  ;//sum ä½æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    wire     signed    [CALCULATE_WIDTH-1: 0]I_sum_H_cali  ;//sum é«˜æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    wire     signed    [CALCULATE_WIDTH-1: 0]I_sum_unit_cali  ;//sum_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    wire     signed    [CALCULATE_WIDTH-1: 0]I_board_unit_cali  ;//board_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
+    wire     signed    [CALCULATE_WIDTH-1: 0]I_board_L_cali  ;//borad µÍµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    wire     signed    [CALCULATE_WIDTH-1: 0]I_board_H_cali  ;//board ¸ßµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    wire     signed    [CALCULATE_WIDTH-1: 0]I_sum_L_cali  ;//sum µÍµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    wire     signed    [CALCULATE_WIDTH-1: 0]I_sum_H_cali  ;//sum ¸ßµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    wire     signed    [CALCULATE_WIDTH-1: 0]I_sum_unit_cali  ;//sum_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    wire     signed    [CALCULATE_WIDTH-1: 0]I_board_unit_cali  ;//board_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
      
     wire               [CALCULATE_WIDTH-1: 0]U_cali_abs  ;
     wire               [CALCULATE_WIDTH-1: 0]I_cali_abs  ;
 
 get_I_gear#(
-    .I_WATERSHED                    (20_000             ),//ç”µæµæŒ¡ä½åˆ‡æ¢åˆ†æ°´å²­20A
-    .I_STANDARD_DEVIATION           (1_000              ) //æ ‡å‡†å·®1A
+    .I_WATERSHED                    (20_000             ),//µçÁ÷µ²Î»ÇĞ»»·ÖË®Áë20A
+    .I_STANDARD_DEVIATION           (1_000              ) //±ê×¼²î1A
 )
  u_get_I_gear(
     .sys_clk_i                      (sys_clk_i          ),// clk100m
     .rst_n_i                        (rst_n_i            ),
     .I_cali_abs_i                   (I_cali_abs         ),
-    .I_gear_H_ON_o                  (I_gear_H_ON        ) // é«˜ä»£è¡¨é«˜æ¡£
+    .I_gear_H_ON_o                  (I_gear_H_ON        ) // ¸ß´ú±í¸ßµµ
 );
 
 adc_Volt_Curr_Cali_wrapper#(
@@ -461,65 +461,65 @@ adc_Volt_Curr_Cali_wrapper#(
     .rst_n_i                        (rst_n_i            ),
     // ADC signal
     .adc_acq_valid_i                (adc_acq_valid_i    ),
-    .I_SUM_H_AD                     (I_SUM_H_AD         ),// I_SUM_H_AD----é«˜æ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ4.521V
-    .I_SUM_L_AD                     (I_SUM_L_AD         ),// I_SUM_L_AD----ä½æ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ
-    .I_BOARD_H_AD                   (I_BOARD_H_AD       ),// I_BOARD_H_AD----é«˜æ¡£ä½æ¿å¡ç”µæµ4.5V
-    .I_BOARD_L_AD                   (I_BOARD_L_AD       ),// I_BOARD_L_AD----ä½æ¡£ä½æ¿å¡ç”µæµ
-    .AD_Vmod                        (AD_Vmod            ),// AD_Vmod----ésenseç«¯ç”µå‹
-    .AD_Vsense                      (AD_Vsense          ),// AD_Vsense----senseç«¯ç”µå‹
-    .I_SUM_UNIT_AD                  (I_SUM_UNIT_AD      ),// I_SUM_UNIT_AD----å•æ¿å¡24æ¨¡å—æ±‡æ€»ç”µæµ4.125V
-    .I_BOARD_UNIT_AD                (I_BOARD_UNIT_AD    ),// I_BOARD_UNIT_AD----å•æ¿å¡å•æ¨¡å—ç”µæµ3.4375V
-    // ç”µå‹ç”µæµé€‰æ‹©å‚æ•°æ§åˆ¶
+    .I_SUM_H_AD                     (I_SUM_H_AD         ),// I_SUM_H_AD----¸ßµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷4.521V
+    .I_SUM_L_AD                     (I_SUM_L_AD         ),// I_SUM_L_AD----µÍµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷
+    .I_BOARD_H_AD                   (I_BOARD_H_AD       ),// I_BOARD_H_AD----¸ßµµÎ»°å¿¨µçÁ÷4.5V
+    .I_BOARD_L_AD                   (I_BOARD_L_AD       ),// I_BOARD_L_AD----µÍµµÎ»°å¿¨µçÁ÷
+    .AD_Vmod                        (AD_Vmod            ),// AD_Vmod----·Çsense¶ËµçÑ¹
+    .AD_Vsense                      (AD_Vsense          ),// AD_Vsense----sense¶ËµçÑ¹
+    .I_SUM_UNIT_AD                  (I_SUM_UNIT_AD      ),// I_SUM_UNIT_AD----µ¥°å¿¨24Ä£¿é»ã×ÜµçÁ÷4.125V
+    .I_BOARD_UNIT_AD                (I_BOARD_UNIT_AD    ),// I_BOARD_UNIT_AD----µ¥°å¿¨µ¥Ä£¿éµçÁ÷3.4375V
+    // µçÑ¹µçÁ÷Ñ¡Ôñ²ÎÊı¿ØÖÆ
     .SENSE_ON_i                     (SENSE_ON           ),
     .U_gear_H_ON_i                  (U_gear_H_ON        ),
     .I_sum_ON_i                     (I_sum_ON           ),
     .I_gear_H_ON_i                  (I_gear_H_ON        ),
-    // caliç³»æ•°
-    .VH_k                           (VH_k               ),// VH_kï¼šç”µå‹modé«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼:39219ï¼‰
+    // caliÏµÊı
+    .VH_k                           (VH_k               ),// VH_k£ºµçÑ¹mod¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ:39219£©
     .VH_a                           (VH_a               ),
-    .VsH_k                          (VsH_k              ),// VsH_kï¼šç”µå‹senseé‡‡æ ·é«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    .VsH_k                          (VsH_k              ),// VsH_k£ºµçÑ¹sense²ÉÑù¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     .VsH_a                          (VsH_a              ),
-    .I1_k                           (I1_k               ),// I_Board_Hé«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 57870ï¼‰
+    .I1_k                           (I1_k               ),// I_Board_H¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ: 57870£©
     .I1_a                           (I1_a               ),
-    .I2_k                           (I2_k               ),// I_Board_Lä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 5787ï¼‰
+    .I2_k                           (I2_k               ),// I_Board_LµÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 5787£©
     .I2_a                           (I2_a               ),
-    .VL_k                           (VL_k               ),// VL_kï¼šç”µå‹é‡‡æ ·ä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 3565ï¼‰
+    .VL_k                           (VL_k               ),// VL_k£ºµçÑ¹²ÉÑùµÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 3565£©
     .VL_a                           (VL_a               ),
-    .VsL_k                          (VsL_k              ),// VsL_kï¼šç”µå‹senseé‡‡æ ·ä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    .VsL_k                          (VsL_k              ),// VsL_k£ºµçÑ¹sense²ÉÑùµÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     .VsL_a                          (VsL_a              ),
-    .It1_k                          (It1_k              ),// It1_kï¼šæ€»ç”µæµé«˜æ¡£I_SUM_Total_Hæ ¡å‡†ï¼ˆé»˜è®¤å€¼: 55298ï¼‰
+    .It1_k                          (It1_k              ),// It1_k£º×ÜµçÁ÷¸ßµµI_SUM_Total_HĞ£×¼£¨Ä¬ÈÏÖµ: 55298£©
     .It1_a                          (It1_a              ),
-    .It2_k                          (It2_k              ),// It2_kï¼šæ€»ç”µæµä½æ¡£I_SUM_Total_Læ ¡å‡†ï¼ˆé»˜è®¤å€¼: 5530ï¼‰
+    .It2_k                          (It2_k              ),// It2_k£º×ÜµçÁ÷µÍµµI_SUM_Total_LĞ£×¼£¨Ä¬ÈÏÖµ: 5530£©
     .It2_a                          (It2_a              ),
 
-    .CVH_k                          (CVH_k              ),//CVæ¨¡å¼é«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    .CVH_k                          (CVH_k              ),//CVÄ£Ê½¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     .CVH_a                          (CVH_a              ),
-    .CVL_k                          (CVL_k              ),//CVæ¨¡å¼ä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    .CVL_k                          (CVL_k              ),//CVÄ£Ê½µÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     .CVL_a                          (CVL_a              ),
-    .CVHs_k                         (CVHs_k             ),//CVæ¨¡å¼senseé«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    .CVHs_k                         (CVHs_k             ),//CVÄ£Ê½sense¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     .CVHs_a                         (CVHs_a             ),
-    .CVLs_k                         (CVLs_k             ),//CVæ¨¡å¼senseä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    .CVLs_k                         (CVLs_k             ),//CVÄ£Ê½senseµÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     .CVLs_a                         (CVLs_a             ),
-    .CV_k                           (CV_k               ),//CVæ¨¡å¼K
-    .CV_a                           (CV_a               ),//CVæ¨¡å¼A
-    //æ ¡å‡†åçš„ç»“æœè¾“å‡º
+    .CV_k                           (CV_k               ),//CVÄ£Ê½K
+    .CV_a                           (CV_a               ),//CVÄ£Ê½A
+    //Ğ£×¼ºóµÄ½á¹ûÊä³ö
     .adc_cali_valid_o               (adc_cali_valid     ),
-    .U_cali_o                       (U_cali             ),// ç”µå‹ï¼Œæ ¡å‡†åçš„å€¼
-    .I_cali_o                       (I_cali             ),// ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    .Umod_cali_o                    (Umod_cali          ),// ç«¯å£ç”µå‹ï¼Œæ ¡å‡†åçš„å€¼
-    .Usense_cali_o                  (Usense_cali        ),// Senseç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    .I_board_L_cali_o               (I_board_L_cali     ),// borad ä½æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    .I_board_H_cali_o               (I_board_H_cali     ),// board é«˜æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    .I_sum_L_cali_o                 (I_sum_L_cali       ),// sum ä½æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    .I_sum_H_cali_o                 (I_sum_H_cali       ),// sum é«˜æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    .I_sum_unit_cali_o              (I_sum_unit_cali    ),// sum_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    .I_board_unit_cali_o            (I_board_unit_cali  ),// board_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    .U_cali_abs_o                   (U_cali_abs         ),// ç”µå‹ï¼Œæ ¡å‡†åçš„ç»å¯¹å€¼
-    .I_cali_abs_o                   (I_cali_abs         ) // ç”µæµï¼Œæ ¡å‡†åçš„ç»å¯¹å€¼
+    .U_cali_o                       (U_cali             ),// µçÑ¹£¬Ğ£×¼ºóµÄÖµ
+    .I_cali_o                       (I_cali             ),// µçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    .Umod_cali_o                    (Umod_cali          ),// ¶Ë¿ÚµçÑ¹£¬Ğ£×¼ºóµÄÖµ
+    .Usense_cali_o                  (Usense_cali        ),// SenseµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    .I_board_L_cali_o               (I_board_L_cali     ),// borad µÍµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    .I_board_H_cali_o               (I_board_H_cali     ),// board ¸ßµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    .I_sum_L_cali_o                 (I_sum_L_cali       ),// sum µÍµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    .I_sum_H_cali_o                 (I_sum_H_cali       ),// sum ¸ßµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    .I_sum_unit_cali_o              (I_sum_unit_cali    ),// sum_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    .I_board_unit_cali_o            (I_board_unit_cali  ),// board_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    .U_cali_abs_o                   (U_cali_abs         ),// µçÑ¹£¬Ğ£×¼ºóµÄ¾ø¶ÔÖµ
+    .I_cali_abs_o                   (I_cali_abs         ) // µçÁ÷£¬Ğ£×¼ºóµÄ¾ø¶ÔÖµ
 );
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// è®¡ç®—å®æ—¶åŠŸç‡å’Œç”µé˜»
+// ¼ÆËãÊµÊ±¹¦ÂÊºÍµç×è
 //---------------------------------------------------------------------
     wire     signed    [  31: 0]    P_rt                ;
     wire     signed    [  31: 0]    R_rt                ;
@@ -531,16 +531,16 @@ get_rt_uipr#(
 u_get_rt_uipr(
     .sys_clk_i                      (sys_clk_i          ),
     .rst_n_i                        (rst_n_i            ),
-//å®æ—¶çš„é‡‡æ ·æ•°æ®
-    .U_abs_i                        (U_cali_abs         ),// å®æ—¶é‡‡æ ·ç”µå‹
-    .I_abs_i                        (I_cali_abs         ),// å®æ—¶é‡‡æ ·ç”µæµ
+//ÊµÊ±µÄ²ÉÑùÊı¾İ
+    .U_abs_i                        (U_cali_abs         ),// ÊµÊ±²ÉÑùµçÑ¹
+    .I_abs_i                        (I_cali_abs         ),// ÊµÊ±²ÉÑùµçÁ÷
     .P_rt_o                         (P_rt               ),
     .R_rt_o                         (R_rt               ) 
 );
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// å‡å€¼æ»¤æ³¢
+// ¾ùÖµÂË²¨
 //---------------------------------------------------------------------
     wire                            adc_cali_mean_valid  ;
     wire     signed    [CALCULATE_WIDTH-1: 0]U_cali_mean  ;
@@ -555,20 +555,20 @@ filtering_wrapper#(
 u_filtering_wrapper(
     .sys_clk_i                      (sys_clk_i          ),
     .rst_n_i                        (rst_n_i            ),
-//æ ¡å‡†åçš„ç»“æœè¾“å…¥
+//Ğ£×¼ºóµÄ½á¹ûÊäÈë
     .adc_cali_valid_i               (adc_cali_valid     ),
-    .U_cali_i                       (U_cali             ),// ç”µå‹ï¼Œæ ¡å‡†åçš„å€¼
-    .I_cali_i                       (I_cali             ),// ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-//æ»¤æ³¢åè¾“å‡º
+    .U_cali_i                       (U_cali             ),// µçÑ¹£¬Ğ£×¼ºóµÄÖµ
+    .I_cali_i                       (I_cali             ),// µçÁ÷£¬Ğ£×¼ºóµÄÖµ
+//ÂË²¨ºóÊä³ö
     .adc_cali_mean_valid_o          (adc_cali_mean_valid),
-    .U_cali_mean_o                  (U_cali_mean        ),// ç”µå‹,æ»¤æ³¢åçš„å€¼
-    .I_cali_mean_o                  (I_cali_mean        ),// ç”µæµ,æ»¤æ³¢åçš„å€¼
-    .U_cali_mean_abs_o              (U_cali_mean_abs    ),// ç”µå‹,æ»¤æ³¢åçš„ç»å¯¹å€¼
-    .I_cali_mean_abs_o              (I_cali_mean_abs    ) // ç”µæµ,æ»¤æ³¢åçš„ç»å¯¹å€¼
+    .U_cali_mean_o                  (U_cali_mean        ),// µçÑ¹,ÂË²¨ºóµÄÖµ
+    .I_cali_mean_o                  (I_cali_mean        ),// µçÁ÷,ÂË²¨ºóµÄÖµ
+    .U_cali_mean_abs_o              (U_cali_mean_abs    ),// µçÑ¹,ÂË²¨ºóµÄ¾ø¶ÔÖµ
+    .I_cali_mean_abs_o              (I_cali_mean_abs    ) // µçÁ÷,ÂË²¨ºóµÄ¾ø¶ÔÖµ
 );
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// å¾—åˆ°æœºå‹æœ€å¤§ç”µå‹ç”µæµç­‰å‚æ•°
+// µÃµ½»úĞÍ×î´óµçÑ¹µçÁ÷µÈ²ÎÊı
 //---------------------------------------------------------------------
     wire               [  31: 0]    U_max               ;
     wire               [  31: 0]    I_max               ;
@@ -618,7 +618,7 @@ get_cv_speed u_get_cv_speed(
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// ä¸»è¦åŠŸèƒ½å®ç°
+// Ö÷Òª¹¦ÄÜÊµÏÖ
 //---------------------------------------------------------------------
     wire                            global_1us_flag     ;
     wire                            pull_on             ;
@@ -654,7 +654,7 @@ u_pull_load_wrapper(
     .rst_n_i                        (rst_n_i            ),
 //software CV
     .CV_mode_hard_ON_i              (CV_mode_hard_ON    ),
-    .Von_i                          (Von                ),// å¼€å¯ç”µå‹mV
+    .Von_i                          (Von                ),// ¿ªÆôµçÑ¹mV
     .Workmod_i                      (Workmod            ),
     .global_1us_flag_i              (global_1us_flag    ),
 
@@ -666,9 +666,9 @@ u_pull_load_wrapper(
     .pull_on_doing_o                (pull_on_doing      ),
     .pull_Rslew_i                   (pull_Rslew         ),
     .pull_Fslew_i                   (pull_Fslew         ),
-    .CV_slew_i                      (CV_slew            ),// CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)
-    .Short_flag_i                   (Short_ON           ),// çŸ­è·¯æµ‹è¯• (STA/DYN)
-    .I_short_i                      (I_short            ),// çŸ­è·¯æ—¶æ‹‰è½½ç”µæµ
+    .CV_slew_i                      (CV_slew            ),// CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)
+    .Short_flag_i                   (Short_ON           ),// ¶ÌÂ·²âÊÔ (STA/DYN)
+    .I_short_i                      (I_short            ),// ¶ÌÂ·Ê±À­ÔØµçÁ÷
     .CC_k_i                         (CC_k               ),
     .CC_a_i                         (CC_a               ),
     .CV_k_i                         (CV_k               ),
@@ -705,8 +705,8 @@ u_main_ctrl_pull_load(
     .Workmod_i                      (Workmod            ),
     .Func_i                         (Func               ),
     .global_1us_flag_o              (global_1us_flag    ),
-    .Von_i                          (Von                ),// å¯åŠ¨ç”µå‹
-    .Voff_i                         (Voff               ),// æˆªè‡³ç”µå‹
+    .Von_i                          (Von                ),// Æô¶¯µçÑ¹
+    .Voff_i                         (Voff               ),// ½ØÖÁµçÑ¹
     .Iset_i                         (Iset               ),
     .Vset_i                         (Vset               ),
     .Pset_i                         (Pset               ),
@@ -719,10 +719,10 @@ u_main_ctrl_pull_load(
     .Pset2_i                        (Pset2              ),
     .Rset1_i                        (Rset1              ),
     .Rset2_i                        (Rset2              ),
-    .SR_slew_i                      (SR_slew            ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SF_slew_i                      (SF_slew            ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .DR_slew_i                      (DR_slew            ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .DF_slew_i                      (DF_slew            ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
+    .SR_slew_i                      (SR_slew            ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SF_slew_i                      (SF_slew            ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .DR_slew_i                      (DR_slew            ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .DF_slew_i                      (DF_slew            ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
     .I_limit_i                      (I_limit            ),
     .V_limit_i                      (V_limit            ),
     .P_limit_i                      (P_limit            ),
@@ -730,7 +730,7 @@ u_main_ctrl_pull_load(
     .Pro_time_i                     (Pro_time           ),
     .T1_i                           (T1                 ),
     .T2_i                           (T2                 ),
-//CCæ‹‰è½½                             
+//CCÀ­ÔØ                             
     .pull_on_o                      (pull_on            ),
     .pull_precharge_en_o            (pull_precharge_en  ),
     .pull_target_o                  (pull_target        ),
@@ -739,11 +739,11 @@ u_main_ctrl_pull_load(
     .pull_Rslew_o                   (pull_Rslew         ),
     .pull_Fslew_o                   (pull_Fslew         ),
     .pull_on_doing_i                (pull_on_doing      ),
-    .U_i                            (U_cali             ),// mV å®æ—¶å€¼ï¼Œæœ‰ç¬¦å·æ•°
-    .I_i                            (I_cali             ),// mV å®æ—¶å€¼ï¼Œæœ‰ç¬¦å·æ•°
-    .U_abs_i                        (U_cali_abs         ),// mV å®æ—¶å€¼
-    .I_abs_i                        (I_cali_abs         ),// mV å®æ—¶å€¼
-    .i_BAT_err                      (                   ) // ç”µæ± é”™è¯¯ b0:Iåå‘ b1:Uåå‘
+    .U_i                            (U_cali             ),// mV ÊµÊ±Öµ£¬ÓĞ·ûºÅÊı
+    .I_i                            (I_cali             ),// mV ÊµÊ±Öµ£¬ÓĞ·ûºÅÊı
+    .U_abs_i                        (U_cali_abs         ),// mV ÊµÊ±Öµ
+    .I_abs_i                        (I_cali_abs         ),// mV ÊµÊ±Öµ
+    .i_BAT_err                      (                   ) // µç³Ø´íÎó b0:I·´Ïò b1:U·´Ïò
 );
 
 // ********************************************************************************** // 
@@ -761,17 +761,17 @@ u_alarm_wrapper(
     .global_1us_flag_i              (global_1us_flag    ),
     .Clear_alarm_ON_i               (Clear_alarm_ON     ),
 //max
-    .U_max_i                        (U_max              ),// æœ€å¤§ç”µå‹é™åˆ¶
-    .I_max_i                        (I_max              ),// æœ€å¤§ç”µæµé™åˆ¶
-    .P_max_i                        (P_max              ),// æœ€å¤§åŠŸç‡é™åˆ¶
+    .U_max_i                        (U_max              ),// ×î´óµçÑ¹ÏŞÖÆ
+    .I_max_i                        (I_max              ),// ×î´óµçÁ÷ÏŞÖÆ
+    .P_max_i                        (P_max              ),// ×î´ó¹¦ÂÊÏŞÖÆ
 //max
-    .U_limit_i                      (                   ),// ç”µå‹é™åˆ¶
-    .I_limit_i                      (I_limit            ),// ç”µæµé™åˆ¶
-    .P_limit_i                      (P_limit            ),// åŠŸç‡é™åˆ¶
-    .Pro_time_i                     (Pro_time           ),// 1-ç«‹å³ä¿æŠ¤ï¼›10-1mSï¼›20-2mSâ€¦â€¦150-15mS
-//å®æ—¶çš„é‡‡æ ·æ•°æ®
-    .U_rt_i                         (U_cali             ),// å®æ—¶é‡‡æ ·ç”µå‹
-    .I_rt_i                         (I_cali             ),// å®æ—¶é‡‡æ ·ç”µæµ
+    .U_limit_i                      (                   ),// µçÑ¹ÏŞÖÆ
+    .I_limit_i                      (I_limit            ),// µçÁ÷ÏŞÖÆ
+    .P_limit_i                      (P_limit            ),// ¹¦ÂÊÏŞÖÆ
+    .Pro_time_i                     (Pro_time           ),// 1-Á¢¼´±£»¤£»10-1mS£»20-2mS¡­¡­150-15mS
+//ÊµÊ±µÄ²ÉÑùÊı¾İ
+    .U_rt_i                         (U_cali             ),// ÊµÊ±²ÉÑùµçÑ¹
+    .I_rt_i                         (I_cali             ),// ÊµÊ±²ÉÑùµçÁ÷
     .P_rt_i                         (P_rt               ),
     .threshold_i                    (sense_err_threshold),
     .Umod_rt_i                      (Umod_cali          ),
@@ -799,8 +799,8 @@ u_get_I_unit(
     .global_1us_flag_i              (global_1us_flag    ),
 // ADC signal
     .adc_valid_i                    (adc_cali_valid     ),
-    .I_sum_unit_i                   (I_sum_unit_cali    ),// sum_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    .I_board_unit_i                 (I_board_unit_cali  ),// board_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
+    .I_sum_unit_i                   (I_sum_unit_cali    ),// sum_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    .I_board_unit_i                 (I_board_unit_cali  ),// board_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
     .SUM_UNIT_0                     (SUM_UNIT_0         ),
     .SUM_UNIT_1                     (SUM_UNIT_1         ),
     .SUM_UNIT_2                     (SUM_UNIT_2         ),

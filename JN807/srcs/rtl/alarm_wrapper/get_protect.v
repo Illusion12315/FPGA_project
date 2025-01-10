@@ -21,9 +21,9 @@ module get_protect #(
     input  wire                     rst_n_i             ,
 
     input  wire                     global_1us_flag_i   ,
-    input  wire        [  23: 0]    protect_time_i      ,//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    input  wire        [CALCULATE_WIDTH-1: 0]protect_limit_i,//éƒ½æ˜¯ç»å¯¹å€¼
-    input  wire        [CALCULATE_WIDTH-1: 0]protect_signal_i,//éƒ½æ˜¯ç»å¯¹å€¼
+    input  wire        [  23: 0]    protect_time_i      ,//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    input  wire        [CALCULATE_WIDTH-1: 0]protect_limit_i,//¶¼ÊÇ¾ø¶ÔÖµ
+    input  wire        [CALCULATE_WIDTH-1: 0]protect_signal_i,//¶¼ÊÇ¾ø¶ÔÖµ
     input  wire                     protect_clear_i     ,
     output reg                      protect_alarm_o      
 );

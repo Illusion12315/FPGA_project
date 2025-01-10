@@ -14,28 +14,28 @@
 
 
 module mean_filtering #(
-    parameter                           MEAN_FILTER_LENGTH        = 1024  ,//éœ€è¦æ˜¯2çš„æ•´æ•°æ¬¡å¹‚ï¼Œå¦‚1 2 4 8ç­‰
-    parameter                           S_AXI_DATA_WIDTH          = 16    //æ•°æ®ä½å®½
+    parameter                           MEAN_FILTER_LENGTH        = 1024  ,//ĞèÒªÊÇ2µÄÕûÊı´ÎÃİ£¬Èç1 2 4 8µÈ
+    parameter                           S_AXI_DATA_WIDTH          = 16    //Êı¾İÎ»¿í
 ) (
     input  wire                         sys_clk_i                  ,
     input  wire                         rst_n_i                    ,
 
-    input  wire                         s_axi_data_tvalid_i        ,//è¾“å…¥ç«¯å£
+    input  wire                         s_axi_data_tvalid_i        ,//ÊäÈë¶Ë¿Ú
     input  wire signed [S_AXI_DATA_WIDTH-1: 0]s_axi_data_tdata_i   ,
 
-    output wire                         m_axi_data_tvalid_o        ,//è¾“å‡ºç«¯å£
+    output wire                         m_axi_data_tvalid_o        ,//Êä³ö¶Ë¿Ú
     output wire signed [S_AXI_DATA_WIDTH-1: 0]m_axi_data_tdata_o    
 );
-    localparam                          RAM_ADDR                  = $clog2(MEAN_FILTER_LENGTH);//log2ä¸ºåº•çš„å¯¹æ•°
+    localparam                          RAM_ADDR                  = $clog2(MEAN_FILTER_LENGTH);//log2Îªµ×µÄ¶ÔÊı
 // (*ram_style = block*)
-    reg      signed    [S_AXI_DATA_WIDTH-1: 0]mean_filter_data_ram[0:MEAN_FILTER_LENGTH-1]  ;//ç¼“å­˜å¯„å­˜å™¨ï¼Œå¯ç”¨ramæˆ–è€…regå®ç°
-    reg                [RAM_ADDR-1: 0]  mean_filter_data_ram_addr=0  ;//ç¼“å­˜å¯„å­˜å™¨åœ°å€
-    reg      signed    [S_AXI_DATA_WIDTH+RAM_ADDR-1: 0]mean_calculate_reg='d0  ;//è®¡ç®—ç»“æœ
-    reg                                 first_time_flag=0          ;//ç¬¬ä¸€æ¬¡æœ‰æ•ˆæ•°æ®
+    reg      signed    [S_AXI_DATA_WIDTH-1: 0]mean_filter_data_ram[0:MEAN_FILTER_LENGTH-1]  ;//»º´æ¼Ä´æÆ÷£¬¿ÉÓÃram»òÕßregÊµÏÖ
+    reg                [RAM_ADDR-1: 0]  mean_filter_data_ram_addr=0  ;//»º´æ¼Ä´æÆ÷µØÖ·
+    reg      signed    [S_AXI_DATA_WIDTH+RAM_ADDR-1: 0]mean_calculate_reg='d0  ;//¼ÆËã½á¹û
+    reg                                 first_time_flag=0          ;//µÚÒ»´ÎÓĞĞ§Êı¾İ
     integer                             i                          ;
 
     assign                              m_axi_data_tvalid_o       = first_time_flag && s_axi_data_tvalid_i;
-    assign                              m_axi_data_tdata_o        = mean_calculate_reg[S_AXI_DATA_WIDTH+RAM_ADDR-1: RAM_ADDR];//è®¡ç®—å‡å€¼
+    assign                              m_axi_data_tdata_o        = mean_calculate_reg[S_AXI_DATA_WIDTH+RAM_ADDR-1: RAM_ADDR];//¼ÆËã¾ùÖµ
 
 initial begin
     for (i = 0; i<MEAN_FILTER_LENGTH; i = i+1) begin
@@ -43,7 +43,7 @@ initial begin
     end
 end    
 
-//ä¾æ¬¡ç¼“å­˜æ•°æ®ï¼Œå¹¶ä¸”å°†åœ°å€è¦†ç›–
+//ÒÀ´Î»º´æÊı¾İ£¬²¢ÇÒ½«µØÖ·¸²¸Ç
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
         mean_filter_data_ram_addr <= 'd0;
@@ -52,7 +52,7 @@ always@(posedge sys_clk_i)begin
         mean_filter_data_ram_addr <= mean_filter_data_ram_addr + 'd1;
     end
 end
-//ç¼“å­˜æ•°æ®
+//»º´æÊı¾İ
 always@(posedge sys_clk_i)begin
     if (s_axi_data_tvalid_i) begin
         mean_filter_data_ram[mean_filter_data_ram_addr] <= s_axi_data_tdata_i;
@@ -67,7 +67,7 @@ always@(posedge sys_clk_i)begin
         first_time_flag <= 'd1;
     end
 end
-//è®¡ç®—Nç‚¹æ€»å€¼
+//¼ÆËãNµã×ÜÖµ
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
         mean_calculate_reg <= 'd0;

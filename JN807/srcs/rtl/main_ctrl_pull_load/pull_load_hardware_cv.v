@@ -16,8 +16,8 @@
 module pull_load_hardware_cv #(
     parameter                       SIMULATION         = 0     ,
     parameter                       CALCULATE_WIDTH    = 24    ,
-    parameter                       RF_MAX_LIMIT       = 30_000_000,//æœ€å¤§ä¸Šå‡ä¸‹é™æ–œç‡é™åˆ¶ï¼Œå•ä½1mA/ms
-    parameter                       PRECHARGE_I        = 30    ,//MOSé¢„å……ç”µç”µæµ(mA)
+    parameter                       RF_MAX_LIMIT       = 30_000_000,//×î´óÉÏÉıÏÂ½µĞ±ÂÊÏŞÖÆ£¬µ¥Î»1mA/ms
+    parameter                       PRECHARGE_I        = 30    ,//MOSÔ¤³äµçµçÁ÷(mA)
     parameter                       AXI_REG_WIDTH      = 24    
 ) (
     input  wire                     sys_clk_i           ,
@@ -25,25 +25,25 @@ module pull_load_hardware_cv #(
 
     input  wire                     on_i                ,
     input  wire                     global_1us_flag_i   ,
-    input  wire signed [AXI_REG_WIDTH-1: 0]target_i     ,//ç›®æ ‡å€¼mV
-    input  wire signed [AXI_REG_WIDTH-1: 0]initI_i      ,//åˆå§‹ç”µæµå€¼mA
-    input  wire signed [AXI_REG_WIDTH-1: 0]limitI_i     ,//é™åˆ¶ç”µæµmA
-    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_i    ,//CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)
-    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_period_i,//CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)
-    input  wire        [AXI_REG_WIDTH-1: 0]SR_slew_i    ,//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    input  wire        [AXI_REG_WIDTH-1: 0]SF_slew_i    ,//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤ 
-    input  wire        [AXI_REG_WIDTH+20-1: 0]SR_slew_period_i,//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    input  wire        [AXI_REG_WIDTH+20-1: 0]SF_slew_period_i,//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
+    input  wire signed [AXI_REG_WIDTH-1: 0]target_i     ,//Ä¿±êÖµmV
+    input  wire signed [AXI_REG_WIDTH-1: 0]initI_i      ,//³õÊ¼µçÁ÷ÖµmA
+    input  wire signed [AXI_REG_WIDTH-1: 0]limitI_i     ,//ÏŞÖÆµçÁ÷mA
+    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_i    ,//CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)
+    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_period_i,//CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)
+    input  wire        [AXI_REG_WIDTH-1: 0]SR_slew_i    ,//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    input  wire        [AXI_REG_WIDTH-1: 0]SF_slew_i    ,//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤ 
+    input  wire        [AXI_REG_WIDTH+20-1: 0]SR_slew_period_i,//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    input  wire        [AXI_REG_WIDTH+20-1: 0]SF_slew_period_i,//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
 
-    input  wire                     Short_flag_i        ,//çŸ­è·¯æµ‹è¯• (STA/DYN)
+    input  wire                     Short_flag_i        ,//¶ÌÂ·²âÊÔ (STA/DYN)
 
-    input  wire signed [  15: 0]    k_i                 ,//CV limitæ ¡å‡†
+    input  wire signed [  15: 0]    k_i                 ,//CV limitĞ£×¼
     input  wire signed [  15: 0]    b_i                 ,
-    input  wire signed [  15: 0]    k_cv_i              ,//CV targetæ ¡å‡†
+    input  wire signed [  15: 0]    k_cv_i              ,//CV targetĞ£×¼
     input  wire signed [  15: 0]    b_cv_i              ,
     input  wire        [CALCULATE_WIDTH-1: 0]U_abs_i    ,//mV
     
-    output wire                     pull_on_doing_o     ,//è¡¨é¢å½“å‰æ­£åœ¨è¿›è¡Œç”µæµè¾“å‡ºæ§åˆ¶
+    output wire                     pull_on_doing_o     ,//±íÃæµ±Ç°ÕıÔÚ½øĞĞµçÁ÷Êä³ö¿ØÖÆ
 
     output reg                      dac_data_valid_o    ,
     output reg         [  15: 0]    dac_data_o          ,
@@ -64,7 +64,7 @@ module pull_load_hardware_cv #(
     reg                [AXI_REG_WIDTH+20-1: 0]cv_target_ext  ;
     reg                [AXI_REG_WIDTH-1: 0]cv_limit_temp  ;
     reg                [AXI_REG_WIDTH+20-1: 0]cv_limit_ext  ;
-    reg                [AXI_REG_WIDTH-1: 0]targetI      ;//ç›®æ ‡ç”µæµ
+    reg                [AXI_REG_WIDTH-1: 0]targetI      ;//Ä¿±êµçÁ÷
     wire               [AXI_REG_WIDTH-1: 0]target_ctrl  ;
     wire               [AXI_REG_WIDTH-1: 0]target_ctrl_cali  ;
     wire               [AXI_REG_WIDTH-1: 0]cv_limit_cali  ;
@@ -74,8 +74,8 @@ module pull_load_hardware_cv #(
     reg                             short_state_add=0   ;
     reg                             on_state_add=0      ;
     
-    reg                [AXI_REG_WIDTH-1: 0]initU_cache  ;//åˆå§‹ç”µå‹å€¼mV
-    reg                [AXI_REG_WIDTH-1: 0]initI_cache  ;//åˆå§‹ç”µå‹å€¼mA
+    reg                [AXI_REG_WIDTH-1: 0]initU_cache  ;//³õÊ¼µçÑ¹ÖµmV
+    reg                [AXI_REG_WIDTH-1: 0]initI_cache  ;//³õÊ¼µçÑ¹ÖµmA
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
 // main logic
@@ -141,9 +141,9 @@ always@(posedge sys_clk_i)begin
 end
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// æŒ‰ç…§æ–œç‡å’Œé€»è¾‘è¾“å‡º
+// °´ÕÕĞ±ÂÊºÍÂß¼­Êä³ö
 //---------------------------------------------------------------------
-//ç¼“å­˜onä¹‹å‰çš„åˆå§‹ç”µå‹
+//»º´æonÖ®Ç°µÄ³õÊ¼µçÑ¹
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
         initU_cache <= 'd0;
@@ -160,7 +160,7 @@ always@(posedge sys_clk_i)begin
         cv_target_temp <= 'd0;
         cv_target_ext  <= 'd0;
     end
-    else if (on_i) begin                                            //onçš„çŠ¶æ€ä¸‹ï¼Œæ²¿ç€æ–œç‡æ§åˆ¶
+    else if (on_i) begin                                            //onµÄ×´Ì¬ÏÂ£¬ÑØ×ÅĞ±ÂÊ¿ØÖÆ
 
         if (time_1ms_flag && (cv_target_temp > (target_i + CV_slew_i)))
             cv_target_temp <= cv_target_temp - CV_slew_i;
@@ -181,11 +181,11 @@ always@(posedge sys_clk_i)begin
             cv_target_ext <= {target_i ,20'b0};
 
     end
-    else if (on_state_add) begin                                    //oné‡Šæ”¾æ—¶ï¼Œç”±LIMITæ§åˆ¶
+    else if (on_state_add) begin                                    //onÊÍ·ÅÊ±£¬ÓÉLIMIT¿ØÖÆ
         cv_target_temp <= cv_target_temp;
         cv_target_ext  <= cv_target_ext;
     end
-    else begin                                                      //offçŠ¶æ€ä¸‹ï¼Œæ¢å¤åˆå€¼
+    else begin                                                      //off×´Ì¬ÏÂ£¬»Ö¸´³õÖµ
         cv_target_temp <= U_abs_i;
         cv_target_ext  <= {U_abs_i, 20'b0};
     end
@@ -198,15 +198,15 @@ always@(posedge sys_clk_i)begin
         cv_limit_temp <= 'd0;
         cv_limit_ext  <= 'd0;
     end
-    else if (on_i) begin                                            //å¼€æœºæ—¶ä¸ºè¾“å…¥å€¼
+    else if (on_i) begin                                            //¿ª»úÊ±ÎªÊäÈëÖµ
         cv_limit_temp <= limitI_i;
         cv_limit_ext  <= {limitI_i, 20'b0};
     end
-    else if (!on_i && on_r1) begin                                  //å…³æœºç¬é—´ï¼Œå…ˆæŠŠlimitæ‹‰å›å½“å‰è¾“å‡ºçš„å€¼
+    else if (!on_i && on_r1) begin                                  //¹Ø»úË²¼ä£¬ÏÈ°ÑlimitÀ­»Øµ±Ç°Êä³öµÄÖµ
         cv_limit_temp <= targetI;
         cv_limit_ext  <= {targetI, 20'b0};
     end
-    else if (on_state_add) begin                                    //å…³æœºåï¼Œæ²¿ç€æ–œç‡ä¸‹é™
+    else if (on_state_add) begin                                    //¹Ø»úºó£¬ÑØ×ÅĞ±ÂÊÏÂ½µ
         
         if (time_1ms_flag && (cv_limit_temp > (initI_cache + SF_slew_i)))
             cv_limit_temp <= cv_limit_temp - SF_slew_i;
@@ -227,7 +227,7 @@ always@(posedge sys_clk_i)begin
             cv_limit_ext <= {initI_cache ,20'b0};
 
     end
-    else begin                                                      //å®Œå…¨å…³é—­åï¼Œå›åˆ°åˆå€¼
+    else begin                                                      //ÍêÈ«¹Ø±Õºó£¬»Øµ½³õÖµ
         cv_limit_temp <= limitI_i;
         cv_limit_ext  <= {limitI_i, 20'b0};
     end
@@ -237,9 +237,9 @@ end
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// ç”µå‹ç¯
+// µçÑ¹»·
 //---------------------------------------------------------------------
-//ç¡¬ä»¶CVç”µå‹ç¯è·¯åœ¨å¤–é¢ç”µè·¯æ¿ä¸Š
+//Ó²¼şCVµçÑ¹»·Â·ÔÚÍâÃæµçÂ·°åÉÏ
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
 // cali

@@ -21,8 +21,8 @@ module get_I_unit #(
     input  wire                     global_1us_flag_i   ,
     // ADC signal
     input  wire                     adc_valid_i         ,
-    input  wire signed [CALCULATE_WIDTH-1: 0]I_sum_unit_i,//sum_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    input  wire signed [CALCULATE_WIDTH-1: 0]I_board_unit_i,//board_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
+    input  wire signed [CALCULATE_WIDTH-1: 0]I_sum_unit_i,//sum_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    input  wire signed [CALCULATE_WIDTH-1: 0]I_board_unit_i,//board_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
 
     output reg         [  31: 0]    SUM_UNIT_0          ,
     output reg         [  31: 0]    SUM_UNIT_1          ,
@@ -44,7 +44,7 @@ module get_I_unit #(
     output reg                      en_sample_o         ,
     output reg         [   2: 0]    sel_sample_o         
 );
-    localparam                      GAP_MS_NUM         = 100   ;//100MSå˜ä¸€æ¬¡
+    localparam                      GAP_MS_NUM         = 100   ;//100MS±äÒ»´Î
     localparam                      TIME_1MS           = 1000  ;
 
     wire                            time_1ms_flag       ;

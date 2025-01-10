@@ -14,71 +14,71 @@
 
 
 module adc_Volt_Curr_Cali_wrapper #(
-    parameter                       CALCULATE_WIDTH    = 24    ,//è®¡ç®—ç²¾åº¦
+    parameter                       CALCULATE_WIDTH    = 24    ,//¼ÆËã¾«¶È
     parameter                       CALI_WIDTH         = 16    
 ) (
     input  wire                     sys_clk_i           ,
     input  wire                     rst_n_i             ,
     // ADC signal
     input  wire                     adc_acq_valid_i     ,
-    input  wire signed [  15: 0]    I_SUM_H_AD          ,//I_SUM_H_AD----é«˜æ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ4.521V
-    input  wire signed [  15: 0]    I_SUM_L_AD          ,//I_SUM_L_AD----ä½æ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ
-    input  wire signed [  15: 0]    I_BOARD_H_AD        ,//I_BOARD_H_AD----é«˜æ¡£ä½æ¿å¡ç”µæµ4.5V
-    input  wire signed [  15: 0]    I_BOARD_L_AD        ,//I_BOARD_L_AD----ä½æ¡£ä½æ¿å¡ç”µæµ
-    input  wire signed [  15: 0]    AD_Vmod             ,//AD_Vmod----ésenseç«¯ç”µå‹
-    input  wire signed [  15: 0]    AD_Vsense           ,//AD_Vsense----senseç«¯ç”µå‹
-    input  wire signed [  15: 0]    I_SUM_UNIT_AD       ,//I_SUM_UNIT_AD----å•æ¿å¡24æ¨¡å—æ±‡æ€»ç”µæµ4.125V
-    input  wire signed [  15: 0]    I_BOARD_UNIT_AD     ,//I_BOARD_UNIT_AD----å•æ¿å¡å•æ¨¡å—ç”µæµ3.4375V
-    // ç”µå‹ç”µæµé€‰æ‹©å‚æ•°æ§åˆ¶
+    input  wire signed [  15: 0]    I_SUM_H_AD          ,//I_SUM_H_AD----¸ßµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷4.521V
+    input  wire signed [  15: 0]    I_SUM_L_AD          ,//I_SUM_L_AD----µÍµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷
+    input  wire signed [  15: 0]    I_BOARD_H_AD        ,//I_BOARD_H_AD----¸ßµµÎ»°å¿¨µçÁ÷4.5V
+    input  wire signed [  15: 0]    I_BOARD_L_AD        ,//I_BOARD_L_AD----µÍµµÎ»°å¿¨µçÁ÷
+    input  wire signed [  15: 0]    AD_Vmod             ,//AD_Vmod----·Çsense¶ËµçÑ¹
+    input  wire signed [  15: 0]    AD_Vsense           ,//AD_Vsense----sense¶ËµçÑ¹
+    input  wire signed [  15: 0]    I_SUM_UNIT_AD       ,//I_SUM_UNIT_AD----µ¥°å¿¨24Ä£¿é»ã×ÜµçÁ÷4.125V
+    input  wire signed [  15: 0]    I_BOARD_UNIT_AD     ,//I_BOARD_UNIT_AD----µ¥°å¿¨µ¥Ä£¿éµçÁ÷3.4375V
+    // µçÑ¹µçÁ÷Ñ¡Ôñ²ÎÊı¿ØÖÆ
     input  wire                     SENSE_ON_i          ,
     input  wire                     U_gear_H_ON_i       ,
     input  wire                     I_sum_ON_i          ,
     input  wire                     I_gear_H_ON_i       ,
-    // caliç³»æ•°
-    input  wire signed [CALI_WIDTH-1: 0]VH_k            ,//VH_kï¼šç”µå‹modé«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼:39219ï¼‰
+    // caliÏµÊı
+    input  wire signed [CALI_WIDTH-1: 0]VH_k            ,//VH_k£ºµçÑ¹mod¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ:39219£©
     input  wire signed [CALI_WIDTH-1: 0]VH_a            ,
-    input  wire signed [CALI_WIDTH-1: 0]VsH_k           ,//VsH_kï¼šç”µå‹senseé‡‡æ ·é«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]VsH_k           ,//VsH_k£ºµçÑ¹sense²ÉÑù¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     input  wire signed [CALI_WIDTH-1: 0]VsH_a           ,
-    input  wire signed [CALI_WIDTH-1: 0]I1_k            ,//I_Board_Hé«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 57870ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]I1_k            ,//I_Board_H¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ: 57870£©
     input  wire signed [CALI_WIDTH-1: 0]I1_a            ,
-    input  wire signed [CALI_WIDTH-1: 0]I2_k            ,//I_Board_Lä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 5787ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]I2_k            ,//I_Board_LµÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 5787£©
     input  wire signed [CALI_WIDTH-1: 0]I2_a            ,
-    input  wire signed [CALI_WIDTH-1: 0]VL_k            ,//VL_kï¼šç”µå‹é‡‡æ ·ä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 3565ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]VL_k            ,//VL_k£ºµçÑ¹²ÉÑùµÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 3565£©
     input  wire signed [CALI_WIDTH-1: 0]VL_a            ,
-    input  wire signed [CALI_WIDTH-1: 0]VsL_k           ,//VsL_kï¼šç”µå‹senseé‡‡æ ·ä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]VsL_k           ,//VsL_k£ºµçÑ¹sense²ÉÑùµÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     input  wire signed [CALI_WIDTH-1: 0]VsL_a           ,
-    input  wire signed [CALI_WIDTH-1: 0]It1_k           ,//It1_kï¼šæ€»ç”µæµé«˜æ¡£I_SUM_Total_Hæ ¡å‡†ï¼ˆé»˜è®¤å€¼: 55298ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]It1_k           ,//It1_k£º×ÜµçÁ÷¸ßµµI_SUM_Total_HĞ£×¼£¨Ä¬ÈÏÖµ: 55298£©
     input  wire signed [CALI_WIDTH-1: 0]It1_a           ,
-    input  wire signed [CALI_WIDTH-1: 0]It2_k           ,//It2_kï¼šæ€»ç”µæµä½æ¡£I_SUM_Total_Læ ¡å‡†ï¼ˆé»˜è®¤å€¼: 5530ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]It2_k           ,//It2_k£º×ÜµçÁ÷µÍµµI_SUM_Total_LĞ£×¼£¨Ä¬ÈÏÖµ: 5530£©
     input  wire signed [CALI_WIDTH-1: 0]It2_a           ,
 
-    input  wire signed [CALI_WIDTH-1: 0]CVH_k           ,//CVæ¨¡å¼é«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]CVH_k           ,//CVÄ£Ê½¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     input  wire signed [CALI_WIDTH-1: 0]CVH_a           ,
-    input  wire signed [CALI_WIDTH-1: 0]CVL_k           ,//CVæ¨¡å¼ä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]CVL_k           ,//CVÄ£Ê½µÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     input  wire signed [CALI_WIDTH-1: 0]CVL_a           ,
-    input  wire signed [CALI_WIDTH-1: 0]CVHs_k          ,//CVæ¨¡å¼senseé«˜æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]CVHs_k          ,//CVÄ£Ê½sense¸ßµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     input  wire signed [CALI_WIDTH-1: 0]CVHs_a          ,
-    input  wire signed [CALI_WIDTH-1: 0]CVLs_k          ,//CVæ¨¡å¼senseä½æ¡£æ ¡å‡†ï¼ˆé»˜è®¤å€¼: 0X ï¼‰
+    input  wire signed [CALI_WIDTH-1: 0]CVLs_k          ,//CVÄ£Ê½senseµÍµµĞ£×¼£¨Ä¬ÈÏÖµ: 0X £©
     input  wire signed [CALI_WIDTH-1: 0]CVLs_a          ,
 
-    output reg  signed [CALI_WIDTH-1: 0]CV_k            ,//CVæ¨¡å¼K
-    output reg  signed [CALI_WIDTH-1: 0]CV_a            ,//CVæ¨¡å¼A
-    //æ ¡å‡†åçš„ç»“æœè¾“å‡º
+    output reg  signed [CALI_WIDTH-1: 0]CV_k            ,//CVÄ£Ê½K
+    output reg  signed [CALI_WIDTH-1: 0]CV_a            ,//CVÄ£Ê½A
+    //Ğ£×¼ºóµÄ½á¹ûÊä³ö
     output wire                     adc_cali_valid_o    ,
-    output wire signed [CALCULATE_WIDTH-1: 0]U_cali_o   ,//ç”µå‹ï¼Œæ ¡å‡†åçš„å€¼
-    output reg  signed [CALCULATE_WIDTH-1: 0]I_cali_o   ,//ç”µæµï¼Œæ ¡å‡†åçš„å€¼
+    output wire signed [CALCULATE_WIDTH-1: 0]U_cali_o   ,//µçÑ¹£¬Ğ£×¼ºóµÄÖµ
+    output reg  signed [CALCULATE_WIDTH-1: 0]I_cali_o   ,//µçÁ÷£¬Ğ£×¼ºóµÄÖµ
 
-    output wire signed [CALCULATE_WIDTH-1: 0]Umod_cali_o,//ç«¯å£ç”µå‹ï¼Œæ ¡å‡†åçš„å€¼
-    output wire signed [CALCULATE_WIDTH-1: 0]Usense_cali_o,//Senseç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    output wire signed [CALCULATE_WIDTH-1: 0]I_board_L_cali_o,//borad ä½æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    output wire signed [CALCULATE_WIDTH-1: 0]I_board_H_cali_o,//board é«˜æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    output wire signed [CALCULATE_WIDTH-1: 0]I_sum_L_cali_o,//sum ä½æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    output wire signed [CALCULATE_WIDTH-1: 0]I_sum_H_cali_o,//sum é«˜æ¡£ç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    output wire signed [CALCULATE_WIDTH-1: 0]I_sum_unit_cali_o,//sum_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    output wire signed [CALCULATE_WIDTH-1: 0]I_board_unit_cali_o,//board_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
+    output wire signed [CALCULATE_WIDTH-1: 0]Umod_cali_o,//¶Ë¿ÚµçÑ¹£¬Ğ£×¼ºóµÄÖµ
+    output wire signed [CALCULATE_WIDTH-1: 0]Usense_cali_o,//SenseµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    output wire signed [CALCULATE_WIDTH-1: 0]I_board_L_cali_o,//borad µÍµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    output wire signed [CALCULATE_WIDTH-1: 0]I_board_H_cali_o,//board ¸ßµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    output wire signed [CALCULATE_WIDTH-1: 0]I_sum_L_cali_o,//sum µÍµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    output wire signed [CALCULATE_WIDTH-1: 0]I_sum_H_cali_o,//sum ¸ßµµµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    output wire signed [CALCULATE_WIDTH-1: 0]I_sum_unit_cali_o,//sum_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    output wire signed [CALCULATE_WIDTH-1: 0]I_board_unit_cali_o,//board_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
 
-    output wire        [CALCULATE_WIDTH-1: 0]U_cali_abs_o,//ç”µå‹ï¼Œæ ¡å‡†åçš„ç»å¯¹å€¼
-    output wire        [CALCULATE_WIDTH-1: 0]I_cali_abs_o //ç”µæµï¼Œæ ¡å‡†åçš„ç»å¯¹å€¼
+    output wire        [CALCULATE_WIDTH-1: 0]U_cali_abs_o,//µçÑ¹£¬Ğ£×¼ºóµÄ¾ø¶ÔÖµ
+    output wire        [CALCULATE_WIDTH-1: 0]I_cali_abs_o //µçÁ÷£¬Ğ£×¼ºóµÄ¾ø¶ÔÖµ
 );
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
@@ -100,10 +100,10 @@ module adc_Volt_Curr_Cali_wrapper #(
     assign                          U_cali_abs_o       = signed2unsigned(U_cali_o);
     assign                          I_cali_abs_o       = signed2unsigned(I_cali_o);
 
-    assign                          adc_cali_valid_o   = adc_acq_valid_r5;// ç”±è¿ç®—å»¶è¿Ÿå†³å®šï¼Œä¸cali_oæ•°æ®åŒ¹é…
+    assign                          adc_cali_valid_o   = adc_acq_valid_r5;// ÓÉÔËËãÑÓ³Ù¾ö¶¨£¬Óëcali_oÊı¾İÆ¥Åä
 
-    assign                          I_sum_unit_cali_o  = {{(CALCULATE_WIDTH-16){I_SUM_UNIT_AD[15]}},I_SUM_UNIT_AD};//sum_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
-    assign                          I_board_unit_cali_o= {{(CALCULATE_WIDTH-16){I_BOARD_UNIT_AD[15]}},I_BOARD_UNIT_AD};//board_unitç”µæµï¼Œæ ¡å‡†åçš„å€¼
+    assign                          I_sum_unit_cali_o  = {{(CALCULATE_WIDTH-16){I_SUM_UNIT_AD[15]}},I_SUM_UNIT_AD};//sum_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
+    assign                          I_board_unit_cali_o= {{(CALCULATE_WIDTH-16){I_BOARD_UNIT_AD[15]}},I_BOARD_UNIT_AD};//board_unitµçÁ÷£¬Ğ£×¼ºóµÄÖµ
 
 always@(posedge sys_clk_i)begin
     adc_acq_valid_r1 <= adc_acq_valid_i;
@@ -194,7 +194,7 @@ cali_k_mult_x_add_b u_Umod_cali(
     .x_i                            (AD_Vmod            ),
     .k_i                            (U_k_cali_code      ),
     .b_i                            (U_b_cali_code      ),
-    .right_shift_i                  ('d10               ),//ç¼©å°å€æ•°2**N
+    .right_shift_i                  ('d10               ),//ËõĞ¡±¶Êı2**N
     .y_o                            (Umod_cali_o        ) 
 );
 
@@ -203,7 +203,7 @@ cali_k_mult_x_add_b u_Usense_cali(
     .x_i                            (AD_Vsense          ),
     .k_i                            (U_k_cali_code      ),
     .b_i                            (U_b_cali_code      ),
-    .right_shift_i                  ('d10               ),//ç¼©å°å€æ•°2**N
+    .right_shift_i                  ('d10               ),//ËõĞ¡±¶Êı2**N
     .y_o                            (Usense_cali_o      ) 
 );
 
@@ -212,7 +212,7 @@ cali_k_mult_x_add_b u_I_board_L_cali(                               //SUM off, g
     .x_i                            (I_BOARD_L_AD       ),
     .k_i                            (I2_k               ),
     .b_i                            (I2_a               ),
-    .right_shift_i                  ('d13               ),//ç¼©å°å€æ•°2**N
+    .right_shift_i                  ('d13               ),//ËõĞ¡±¶Êı2**N
     .y_o                            (I_board_L_cali_o   ) 
 );
 
@@ -221,7 +221,7 @@ cali_k_mult_x_add_b u_I_board_H_cali(                               //SUM off, g
     .x_i                            (I_BOARD_H_AD       ),
     .k_i                            (I1_k               ),
     .b_i                            (I1_a               ),
-    .right_shift_i                  ('d13               ),//ç¼©å°å€æ•°2**N
+    .right_shift_i                  ('d13               ),//ËõĞ¡±¶Êı2**N
     .y_o                            (I_board_H_cali_o   ) 
 );
 
@@ -230,7 +230,7 @@ cali_k_mult_x_add_b u_I_sum_L_cali(                                 //SUM on, ge
     .x_i                            (I_SUM_L_AD         ),
     .k_i                            (It2_k              ),
     .b_i                            (It2_a              ),
-    .right_shift_i                  ('d13               ),//ç¼©å°å€æ•°2**N
+    .right_shift_i                  ('d13               ),//ËõĞ¡±¶Êı2**N
     .y_o                            (I_sum_L_cali_o     ) 
 );
 
@@ -239,25 +239,25 @@ cali_k_mult_x_add_b u_I_sum_H_cali(                                 //SUM on, ge
     .x_i                            (I_SUM_H_AD         ),
     .k_i                            (It1_k              ),
     .b_i                            (It1_a              ),
-    .right_shift_i                  ('d13               ),//ç¼©å°å€æ•°2**N
+    .right_shift_i                  ('d13               ),//ËõĞ¡±¶Êı2**N
     .y_o                            (I_sum_H_cali_o     ) 
 );
-//ä¿ç•™
+//±£Áô
 // cali_k_mult_x_add_b u_I_board_unit_cali(                         
 //     .sys_clk_i                      (sys_clk_i          ),
 //     .x_i                            (I_SUM_L_AD         ),
 //     .k_i                            (                   ),
 //     .b_i                            (                   ),
-//     .right_shift_i                  ('d15               ),//ç¼©å°å€æ•°2**N
+//     .right_shift_i                  ('d15               ),//ËõĞ¡±¶Êı2**N
 //     .y_o                            (I_board_unit_cali_o) 
 // );
-//ä¿ç•™
+//±£Áô
 // cali_k_mult_x_add_b u_I_sum_unit_cali(                     
 //     .sys_clk_i                      (sys_clk_i          ),
 //     .x_i                            (I_SUM_H_AD         ),
 //     .k_i                            (                   ),
 //     .b_i                            (                   ),
-//     .right_shift_i                  ('d15               ),//ç¼©å°å€æ•°2**N
+//     .right_shift_i                  ('d15               ),//ËõĞ¡±¶Êı2**N
 //     .y_o                            (I_sum_unit_cali_o  ) 
 // );
 

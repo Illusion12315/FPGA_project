@@ -17,7 +17,7 @@ module main_ctrl_pull_load #(
     parameter                       SIMULATION         = 0     ,
     parameter                       CALCULATE_WIDTH    = 24    ,
     parameter                       AXI_REG_WIDTH      = 24    , 
-    parameter                       PRECHARGE_TIME     = 38    ,//38MSé¢„å……ç”µæ—¶é—´
+    parameter                       PRECHARGE_TIME     = 38    ,//38MSÔ¤³äµçÊ±¼ä
 
     parameter                       WORKMOD_CC         = 16'h5a5a,
     parameter                       WORKMOD_CV         = 16'ha5a5,
@@ -39,8 +39,8 @@ module main_ctrl_pull_load #(
     input  wire        [  15: 0]    Func_i              ,
     output wire                     global_1us_flag_o   ,
 
-    input  wire        [  15: 0]    Von_i               ,//å¯åŠ¨ç”µå‹
-    input  wire        [  15: 0]    Voff_i              ,//æˆªè‡³ç”µå‹
+    input  wire        [  15: 0]    Von_i               ,//Æô¶¯µçÑ¹
+    input  wire        [  15: 0]    Voff_i              ,//½ØÖÁµçÑ¹
     input  wire        [  31: 0]    Iset_i              ,
     input  wire        [  31: 0]    Vset_i              ,
     input  wire        [  31: 0]    Pset_i              ,
@@ -53,10 +53,10 @@ module main_ctrl_pull_load #(
     input  wire        [  31: 0]    Pset2_i             ,
     input  wire        [  31: 0]    Rset1_i             ,
     input  wire        [  31: 0]    Rset2_i             ,
-    input  wire        [AXI_REG_WIDTH-1: 0]SR_slew_i    ,//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    input  wire        [AXI_REG_WIDTH-1: 0]SF_slew_i    ,//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤ 
-    input  wire        [AXI_REG_WIDTH-1: 0]DR_slew_i    ,//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    input  wire        [AXI_REG_WIDTH-1: 0]DF_slew_i    ,//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤ 
+    input  wire        [AXI_REG_WIDTH-1: 0]SR_slew_i    ,//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    input  wire        [AXI_REG_WIDTH-1: 0]SF_slew_i    ,//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤ 
+    input  wire        [AXI_REG_WIDTH-1: 0]DR_slew_i    ,//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    input  wire        [AXI_REG_WIDTH-1: 0]DF_slew_i    ,//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤ 
     input  wire        [  31: 0]    I_limit_i           ,
     input  wire        [  31: 0]    V_limit_i           ,
     input  wire        [  31: 0]    P_limit_i           ,
@@ -64,7 +64,7 @@ module main_ctrl_pull_load #(
     input  wire        [  31: 0]    Pro_time_i          ,
     input  wire        [  31: 0]    T1_i                ,
     input  wire        [  31: 0]    T2_i                ,
-    //CCæ‹‰è½½                             
+    //CCÀ­ÔØ                             
     output reg                      pull_on_o           ,
     output reg                      pull_precharge_en_o ,
     output reg         [  31: 0]    pull_target_o       ,
@@ -79,7 +79,7 @@ module main_ctrl_pull_load #(
     input  wire        [CALCULATE_WIDTH-1: 0]U_abs_i    ,//mV    
     input  wire        [CALCULATE_WIDTH-1: 0]I_abs_i    ,//mV    
 
-    input  wire        [   1: 0]    i_BAT_err            //ç”µæ± é”™è¯¯ b0:Iåå‘ b1:Uåå‘
+    input  wire        [   1: 0]    i_BAT_err            //µç³Ø´íÎó b0:I·´Ïò b1:U·´Ïò
 );
 
     localparam                      TIME_1US           = 100   ;
@@ -93,7 +93,7 @@ module main_ctrl_pull_load #(
     reg                             first_precharge_en  ;
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// è®¡æ•°å™¨
+// ¼ÆÊıÆ÷
 //---------------------------------------------------------------------
 generate
     if (SIMULATION) begin
@@ -120,41 +120,41 @@ end
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// å‚æ•°
+// ²ÎÊı
 //--------------------------------------------------------------------
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
         pull_target_o       <= 1'd1;
-        pull_initI_o        <= 1'd1;                                //åˆå§‹ç”µæµå€¼mA
-        pull_limitI_o       <= 1'd1;                                //é™åˆ¶ç”µæµmA
-        pull_Rslew_o        <= 1'd1;                                //ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-        pull_Fslew_o        <= 1'd1;                                //ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
+        pull_initI_o        <= 1'd1;                                //³õÊ¼µçÁ÷ÖµmA
+        pull_limitI_o       <= 1'd1;                                //ÏŞÖÆµçÁ÷mA
+        pull_Rslew_o        <= 1'd1;                                //µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+        pull_Fslew_o        <= 1'd1;                                //µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
     end
     else case (Func_i)
         FUNC_STA: begin
-            pull_Rslew_o <= SR_slew_i;                              //ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-            pull_Fslew_o <= SF_slew_i;                              //ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
+            pull_Rslew_o <= SR_slew_i;                              //µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+            pull_Fslew_o <= SF_slew_i;                              //µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
 
             case (Workmod_i)
-                WORKMOD_CC: begin                                   //é™æ€CC
+                WORKMOD_CC: begin                                   //¾²Ì¬CC
                     pull_target_o <= Iset_i;
-                    pull_initI_o <= I_abs_i;                        //åˆå§‹ç”µæµå€¼mA
-                    pull_limitI_o <= 1000_000;                      //é™åˆ¶ç”µæµmA
+                    pull_initI_o <= I_abs_i;                        //³õÊ¼µçÁ÷ÖµmA
+                    pull_limitI_o <= 1000_000;                      //ÏŞÖÆµçÁ÷mA
                 end
-                WORKMOD_CV: begin                                   //é™æ€CV
+                WORKMOD_CV: begin                                   //¾²Ì¬CV
                     pull_target_o <= Vset_i;
-                    pull_initI_o <= I_abs_i;                        //åˆå§‹ç”µæµå€¼mA
-                    pull_limitI_o <= CV_limit_i;                    //é™åˆ¶ç”µæµmA
+                    pull_initI_o <= I_abs_i;                        //³õÊ¼µçÁ÷ÖµmA
+                    pull_limitI_o <= CV_limit_i;                    //ÏŞÖÆµçÁ÷mA
                 end
-                WORKMOD_CP: begin                                   //é™æ€CP
+                WORKMOD_CP: begin                                   //¾²Ì¬CP
                     pull_target_o <= Pset_i;
-                    pull_initI_o <= I_abs_i;                        //åˆå§‹ç”µæµå€¼mA
-                    pull_limitI_o <= 1000_000;                      //é™åˆ¶ç”µæµmA
+                    pull_initI_o <= I_abs_i;                        //³õÊ¼µçÁ÷ÖµmA
+                    pull_limitI_o <= 1000_000;                      //ÏŞÖÆµçÁ÷mA
                 end
-                WORKMOD_CR: begin                                   //é™æ€CR
+                WORKMOD_CR: begin                                   //¾²Ì¬CR
                     pull_target_o <= Rset_i;
-                    pull_initI_o <= I_abs_i;                        //åˆå§‹ç”µæµå€¼mA
-                    pull_limitI_o <= 1000_000;                      //é™åˆ¶ç”µæµmA
+                    pull_initI_o <= I_abs_i;                        //³õÊ¼µçÁ÷ÖµmA
+                    pull_limitI_o <= 1000_000;                      //ÏŞÖÆµçÁ÷mA
                 end
                 default: begin
                     
@@ -162,29 +162,29 @@ always@(posedge sys_clk_i)begin
             endcase
         end
         FUNC_DYN: begin
-            pull_Rslew_o <= DR_slew_i;                              //ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-            pull_Fslew_o <= DF_slew_i;                              //ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
+            pull_Rslew_o <= DR_slew_i;                              //µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+            pull_Fslew_o <= DF_slew_i;                              //µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
 
             case (Workmod_i)
-                WORKMOD_CC: begin                                   //åŠ¨æ€CC
+                WORKMOD_CC: begin                                   //¶¯Ì¬CC
                     pull_target_o <= (T1_stage_valid) ? Iset1_i : Iset2_i;
-                    pull_initI_o <= I_abs_i;                        //åˆå§‹ç”µæµå€¼mA
-                    pull_limitI_o <= 1000_000;                      //é™åˆ¶ç”µæµmA
+                    pull_initI_o <= I_abs_i;                        //³õÊ¼µçÁ÷ÖµmA
+                    pull_limitI_o <= 1000_000;                      //ÏŞÖÆµçÁ÷mA
                 end
-                WORKMOD_CV: begin                                   //åŠ¨æ€CV
+                WORKMOD_CV: begin                                   //¶¯Ì¬CV
                     pull_target_o <= (T1_stage_valid) ? Vset1_i : Vset2_i;
-                    pull_initI_o <= I_abs_i;                        //åˆå§‹ç”µæµå€¼mA
-                    pull_limitI_o <= CV_limit_i;                    //é™åˆ¶ç”µæµmA
+                    pull_initI_o <= I_abs_i;                        //³õÊ¼µçÁ÷ÖµmA
+                    pull_limitI_o <= CV_limit_i;                    //ÏŞÖÆµçÁ÷mA
                 end
-                WORKMOD_CP: begin                                   //åŠ¨æ€CP
+                WORKMOD_CP: begin                                   //¶¯Ì¬CP
                     pull_target_o <= (T1_stage_valid) ? Pset1_i : Pset2_i;
-                    pull_initI_o <= I_abs_i;                        //åˆå§‹ç”µæµå€¼mA
-                    pull_limitI_o <= 1000_000;                      //é™åˆ¶ç”µæµmA
+                    pull_initI_o <= I_abs_i;                        //³õÊ¼µçÁ÷ÖµmA
+                    pull_limitI_o <= 1000_000;                      //ÏŞÖÆµçÁ÷mA
                 end
-                WORKMOD_CR: begin                                   //åŠ¨æ€CR               
+                WORKMOD_CR: begin                                   //¶¯Ì¬CR               
                     pull_target_o <= (T1_stage_valid) ? Rset1_i : Rset2_i;
-                    pull_initI_o <= I_abs_i;                        //åˆå§‹ç”µæµå€¼mA
-                    pull_limitI_o <= 1000_000;                      //é™åˆ¶ç”µæµmA
+                    pull_initI_o <= I_abs_i;                        //³õÊ¼µçÁ÷ÖµmA
+                    pull_limitI_o <= 1000_000;                      //ÏŞÖÆµçÁ÷mA
                 end
                 default:begin
                     
@@ -207,11 +207,11 @@ always@(posedge sys_clk_i)begin
 end
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// æ‹‰è½½æ§åˆ¶
+// À­ÔØ¿ØÖÆ
 //---------------------------------------------------------------------
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
-        pull_on_o           <= 'd0;                                 //å›åˆ°åˆå€¼
+        pull_on_o           <= 'd0;                                 //»Øµ½³õÖµ
         pull_precharge_en_o <= 'd0;
         pull_precharge_cnt  <= 'd0;
         first_precharge_en  <= 'd1;
@@ -222,12 +222,12 @@ always@(posedge sys_clk_i)begin
             case (Workmod_i)
                 WORKMOD_CC,
                 WORKMOD_CP,
-                WORKMOD_CR: begin                                   //åŠ¨æ€é™æ€CC,CP,CRä¸€æ ·çš„æ‹‰è½½æ§åˆ¶é€»è¾‘
+                WORKMOD_CR: begin                                   //¶¯Ì¬¾²Ì¬CC,CP,CRÒ»ÑùµÄÀ­ÔØ¿ØÖÆÂß¼­
                     if (RUN_flag_ON_i) begin
 
                         if (first_precharge_en) begin
                             if (U_i < Von_i) begin
-                                pull_on_o           <= 'd0;         //onçš„æ—¶å€™ï¼Œå…ˆç­‰ç”µå‹æ»¡è¶³æ¡ä»¶ï¼Œç„¶åå¯åŠ¨é¢„å……ç”µ
+                                pull_on_o           <= 'd0;         //onµÄÊ±ºò£¬ÏÈµÈµçÑ¹Âú×ãÌõ¼ş£¬È»ºóÆô¶¯Ô¤³äµç
                                 pull_precharge_en_o <= 'd0;
                                 pull_precharge_cnt  <= 'd0;
                                 first_precharge_en  <= 'd1;
@@ -253,20 +253,20 @@ always@(posedge sys_clk_i)begin
                         end
                         else begin
                             if (Von_Latch_ON_i) begin
-                                pull_on_o           <= 'd1;         //latch onä¸€ç›´æ‹‰è½½
+                                pull_on_o           <= 'd1;         //latch onÒ»Ö±À­ÔØ
                                 pull_precharge_en_o <= 'd0;
                                 pull_precharge_cnt  <= 'd0;
                                 first_precharge_en  <= 'd0;
                             end
                             else begin
                                 if (U_i < Voff_i) begin
-                                    pull_on_o           <= 'd1;     //æ‹‰ä½ï¼Œè¿”å›é¢„å……ç”µçŠ¶æ€
+                                    pull_on_o           <= 'd1;     //À­µÍ£¬·µ»ØÔ¤³äµç×´Ì¬
                                     pull_precharge_en_o <= 'd1;
                                     pull_precharge_cnt  <= 'd0;
                                     first_precharge_en  <= 'd0;
                                 end
                                 else if (U_i > Von_i) begin
-                                    pull_on_o           <= 'd1;     //æ‹‰è½½åˆ°ç›®æ ‡å€¼
+                                    pull_on_o           <= 'd1;     //À­ÔØµ½Ä¿±êÖµ
                                     pull_precharge_en_o <= 'd0;
                                     pull_precharge_cnt  <= 'd0;
                                     first_precharge_en  <= 'd0;
@@ -276,20 +276,20 @@ always@(posedge sys_clk_i)begin
 
                     end
                     else begin
-                        pull_on_o           <= 'd0;                 //å…³æœºå›åˆ°åˆå€¼
+                        pull_on_o           <= 'd0;                 //¹Ø»ú»Øµ½³õÖµ
                         pull_precharge_en_o <= 'd0;
                         pull_precharge_cnt  <= 'd0;
                         first_precharge_en  <= 'd1;
                     end
                 end
-                WORKMOD_CV: begin                                   //åŠ¨æ€é™æ€CVä¸€æ ·çš„æ‹‰è½½æ§åˆ¶é€»è¾‘
+                WORKMOD_CV: begin                                   //¶¯Ì¬¾²Ì¬CVÒ»ÑùµÄÀ­ÔØ¿ØÖÆÂß¼­
                     pull_on_o <= RUN_flag_ON_i;
-                    pull_precharge_en_o <= 'd0;                     //CVæ¨¡å¼ä¸‹ä¸éœ€è¦é¢„å……ç”µ,æ— è§†
+                    pull_precharge_en_o <= 'd0;                     //CVÄ£Ê½ÏÂ²»ĞèÒªÔ¤³äµç,ÎŞÊÓ
                     pull_precharge_cnt  <= 'd0;
                     first_precharge_en  <= 'd1;
                 end
                 default: begin
-                        pull_on_o           <= 'd0;                 //å…³æœºå›åˆ°åˆå€¼
+                        pull_on_o           <= 'd0;                 //¹Ø»ú»Øµ½³õÖµ
                         pull_precharge_en_o <= 'd0;
                         pull_precharge_cnt  <= 'd0;
                         first_precharge_en  <= 'd1;
@@ -303,7 +303,7 @@ always@(posedge sys_clk_i)begin
 end
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// åŠ¨æ€
+// ¶¯Ì¬
 //---------------------------------------------------------------------
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin

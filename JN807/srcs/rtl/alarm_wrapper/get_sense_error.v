@@ -7,7 +7,7 @@
 // Create Date:           2025/01/09 09:57:38
 // Version:               V1.0
 // PATH:                  srcs\rtl\e_load_wrapper\get_sense_error.v
-// Descriptions:          Senseç«¯å’ŒModç«¯ç”µå‹å·®è¿‡å¤§ï¼ŒæŠ¥Senseé”™è¯¯
+// Descriptions:          Sense¶ËºÍMod¶ËµçÑ¹²î¹ı´ó£¬±¨Sense´íÎó
 // 
 // ********************************************************************************** // 
 `default_nettype none
@@ -54,9 +54,9 @@ u_U_max_protect(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (10_000             ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (threshold_temp     ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (U_xor              ),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (10_000             ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (threshold_temp     ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (U_xor              ),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (sense_error_o      ) 
 );

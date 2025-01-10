@@ -7,16 +7,16 @@
 // Create Date:           2025/01/09 08:30:12
 // Version:               V1.0
 // PATH:                  srcs\rtl\math_operation\mult_x_fixed_point.v
-// Descriptions:          xä¹˜ä»¥å®šç‚¹æ•°
+// Descriptions:          x³ËÒÔ¶¨µãÊı
 // 
 // ********************************************************************************** // 
 `default_nettype none
 
 
 module mult_x_fixed_point #(
-    parameter                       DATA_WIDTH         = 32    ,//è¾“å…¥æ•°æ®å®½åº¦
-    parameter                       FIXED_POINT        = 1.03  ,//xä¹˜ä»¥çš„å®šç‚¹æ•°
-    parameter integer               MULTIPLE           = 10     //æ‰©å¤§2**MULTIPLEå€
+    parameter                       DATA_WIDTH         = 32    ,//ÊäÈëÊı¾İ¿í¶È
+    parameter                       FIXED_POINT        = 1.03  ,//x³ËÒÔµÄ¶¨µãÊı
+    parameter integer               MULTIPLE           = 10     //À©´ó2**MULTIPLE±¶
 ) (
     input  wire                     sys_clk_i           ,
 

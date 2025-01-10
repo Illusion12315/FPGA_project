@@ -17,7 +17,7 @@ module temperature_wrapper #(
     parameter                       C_S_AXI_DATA_WIDTH = 32    ,
     parameter                       C_S_AXI_ADDR_WIDTH = 12    
 ) (
-    //ADC ADS131 æ•£çƒ­å™¨æ¸©åº¦é‡‡é›† 
+    //ADC ADS131 É¢ÈÈÆ÷ÎÂ¶È²É¼¯ 
     input  wire        [32-1: 0]    ch0_temp            ,//input slv_reg000 ch0_temp [32-1:0]
     input  wire        [32-1: 0]    ch1_temp            ,//input slv_reg001 ch1_temp [32-1:0]
     input  wire        [32-1: 0]    ch2_temp            ,//input slv_reg002 ch2_temp [32-1:0]

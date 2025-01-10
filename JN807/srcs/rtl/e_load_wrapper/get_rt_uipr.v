@@ -7,7 +7,7 @@
 // Create Date:           2025/01/10 11:37:35
 // Version:               V1.0
 // PATH:                  srcs\rtl\e_load_wrapper\get_rt_uipr.v
-// Descriptions:          è·å–å®æ—¶çš„UIPR
+// Descriptions:          »ñÈ¡ÊµÊ±µÄUIPR
 // 
 // ********************************************************************************** // 
 `default_nettype none
@@ -20,9 +20,9 @@ module get_rt_uipr #(
     input  wire                     sys_clk_i           ,
     input  wire                     rst_n_i             ,
 
-//å®æ—¶çš„é‡‡æ ·æ•°æ®
-    input  wire signed [CALCULATE_WIDTH-1: 0]U_abs_i    ,//å®æ—¶é‡‡æ ·ç”µå‹
-    input  wire signed [CALCULATE_WIDTH-1: 0]I_abs_i    ,//å®æ—¶é‡‡æ ·ç”µæµ
+//ÊµÊ±µÄ²ÉÑùÊı¾İ
+    input  wire signed [CALCULATE_WIDTH-1: 0]U_abs_i    ,//ÊµÊ±²ÉÑùµçÑ¹
+    input  wire signed [CALCULATE_WIDTH-1: 0]I_abs_i    ,//ÊµÊ±²ÉÑùµçÁ÷
 
     output wire signed [  31: 0]    P_rt_o              ,
     output wire signed [  31: 0]    R_rt_o               
@@ -33,7 +33,7 @@ module get_rt_uipr #(
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// è®¡ç®—å®æ—¶P mW
+// ¼ÆËãÊµÊ±P mW
 //---------------------------------------------------------------------
     assign                          P_rt_o             = P_div_1000[CALCULATE_WIDTH*2+16-1: 16];
 
@@ -57,7 +57,7 @@ div_u48_u16 u_P_div_1000 (
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// è®¡ç®—å®æ—¶R 
+// ¼ÆËãÊµÊ±R 
 //---------------------------------------------------------------------
     wire               [  71: 0]    U_div_I_temp        ;
     wire               [  47: 0]    U_abs_mult10000     ;
@@ -81,7 +81,7 @@ div_s48_s24 u_target_current (
     .m_axis_dout_tdata              (U_div_I_temp       ) // output wire [71 : 0] m_axis_dout_tdata
 );
 
-    assign                          R_rt_o             = U_div_I_temp[AXI_REG_WIDTH+CALCULATE_WIDTH+24-1:24];//å–å•†
+    assign                          R_rt_o             = U_div_I_temp[AXI_REG_WIDTH+CALCULATE_WIDTH+24-1:24];//È¡ÉÌ
 
 
 

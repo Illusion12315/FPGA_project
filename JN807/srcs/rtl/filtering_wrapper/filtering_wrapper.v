@@ -19,17 +19,17 @@ module filtering_wrapper #(
 ) (
     input  wire                     sys_clk_i           ,
     input  wire                     rst_n_i             ,
-    //æ ¡å‡†åçš„ç»“æœè¾“å…¥
+    //Ğ£×¼ºóµÄ½á¹ûÊäÈë
     input  wire                     adc_cali_valid_i    ,
-    input  wire signed [DATA_WIDTH-1: 0]U_cali_i        ,//ç”µå‹ï¼Œæ ¡å‡†åçš„å€¼
-    input  wire signed [DATA_WIDTH-1: 0]I_cali_i        ,//ç”µæµï¼Œæ ¡å‡†åçš„å€¼
+    input  wire signed [DATA_WIDTH-1: 0]U_cali_i        ,//µçÑ¹£¬Ğ£×¼ºóµÄÖµ
+    input  wire signed [DATA_WIDTH-1: 0]I_cali_i        ,//µçÁ÷£¬Ğ£×¼ºóµÄÖµ
     
-    //æ»¤æ³¢åè¾“å‡º
+    //ÂË²¨ºóÊä³ö
     output wire                     adc_cali_mean_valid_o,
-    output wire signed [DATA_WIDTH-1: 0]U_cali_mean_o   ,//ç”µå‹,æ»¤æ³¢åçš„å€¼
-    output wire signed [DATA_WIDTH-1: 0]I_cali_mean_o   ,//ç”µæµ,æ»¤æ³¢åçš„å€¼
-    output wire signed [DATA_WIDTH-1: 0]U_cali_mean_abs_o,//ç”µå‹,æ»¤æ³¢åçš„ç»å¯¹å€¼
-    output wire signed [DATA_WIDTH-1: 0]I_cali_mean_abs_o //ç”µæµ,æ»¤æ³¢åçš„ç»å¯¹å€¼
+    output wire signed [DATA_WIDTH-1: 0]U_cali_mean_o   ,//µçÑ¹,ÂË²¨ºóµÄÖµ
+    output wire signed [DATA_WIDTH-1: 0]I_cali_mean_o   ,//µçÁ÷,ÂË²¨ºóµÄÖµ
+    output wire signed [DATA_WIDTH-1: 0]U_cali_mean_abs_o,//µçÑ¹,ÂË²¨ºóµÄ¾ø¶ÔÖµ
+    output wire signed [DATA_WIDTH-1: 0]I_cali_mean_abs_o //µçÁ÷,ÂË²¨ºóµÄ¾ø¶ÔÖµ
 );
 
     assign                          U_cali_mean_abs_o  = signed2unsigned(U_cali_mean_o);
@@ -42,9 +42,9 @@ mean_filtering#(
 u_U_cali_mean_filtering(
     .sys_clk_i                      (sys_clk_i          ),
     .rst_n_i                        (rst_n_i            ),
-    .s_axi_data_tvalid_i            (adc_cali_valid_i   ),// è¾“å…¥ç«¯å£
+    .s_axi_data_tvalid_i            (adc_cali_valid_i   ),// ÊäÈë¶Ë¿Ú
     .s_axi_data_tdata_i             (U_cali_i           ),
-    .m_axi_data_tvalid_o            (adc_cali_mean_valid_o),// è¾“å‡ºç«¯å£
+    .m_axi_data_tvalid_o            (adc_cali_mean_valid_o),// Êä³ö¶Ë¿Ú
     .m_axi_data_tdata_o             (U_cali_mean_o      ) 
 );
 
@@ -55,9 +55,9 @@ mean_filtering#(
 u_I_cali_mean_filtering(
     .sys_clk_i                      (sys_clk_i          ),
     .rst_n_i                        (rst_n_i            ),
-    .s_axi_data_tvalid_i            (adc_cali_valid_i   ),// è¾“å…¥ç«¯å£
+    .s_axi_data_tvalid_i            (adc_cali_valid_i   ),// ÊäÈë¶Ë¿Ú
     .s_axi_data_tdata_i             (I_cali_i           ),
-    .m_axi_data_tvalid_o            (adc_cali_mean_valid_o),// è¾“å‡ºç«¯å£
+    .m_axi_data_tvalid_o            (adc_cali_mean_valid_o),// Êä³ö¶Ë¿Ú
     .m_axi_data_tdata_o             (I_cali_mean_o      ) 
 );
 

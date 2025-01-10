@@ -21,8 +21,8 @@ module pull_load_wrapper #(
     parameter                       WORKMOD_CR         = 16'h005a,
 
     parameter                       CALCULATE_WIDTH    = 24    ,
-    parameter                       RF_MAX_LIMIT       = 30_000_000,//æœ€å¤§ä¸Šå‡ä¸‹é™æ–œç‡é™åˆ¶ï¼Œå•ä½1mA/ms
-    parameter                       PRECHARGE_I        = 30    ,//MOSé¢„å……ç”µç”µæµ(mA)
+    parameter                       RF_MAX_LIMIT       = 30_000_000,//×î´óÉÏÉıÏÂ½µĞ±ÂÊÏŞÖÆ£¬µ¥Î»1mA/ms
+    parameter                       PRECHARGE_I        = 30    ,//MOSÔ¤³äµçµçÁ÷(mA)
     parameter                       AXI_REG_WIDTH      = 24    
 ) (
     input  wire                     sys_clk_i           ,
@@ -30,7 +30,7 @@ module pull_load_wrapper #(
     //software CV
     input  wire                     CV_mode_hard_ON_i   ,
 
-    input  wire        [CALCULATE_WIDTH-1: 0]Von_i      ,//å¼€å¯ç”µå‹mV
+    input  wire        [CALCULATE_WIDTH-1: 0]Von_i      ,//¿ªÆôµçÑ¹mV
     input  wire        [  15: 0]    Workmod_i           ,
     input  wire                     global_1us_flag_i   ,
     
@@ -42,10 +42,10 @@ module pull_load_wrapper #(
     output reg                      pull_on_doing_o     ,
     input  wire        [AXI_REG_WIDTH-1: 0]pull_Rslew_i ,
     input  wire        [AXI_REG_WIDTH-1: 0]pull_Fslew_i ,
-    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_i    ,//CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)    
+    input  wire        [AXI_REG_WIDTH-1: 0]CV_slew_i    ,//CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)    
 
-    input  wire                     Short_flag_i        ,//çŸ­è·¯æµ‹è¯• (STA/DYN)
-    input  wire        [AXI_REG_WIDTH-1: 0]I_short_i    ,//çŸ­è·¯æ—¶æ‹‰è½½ç”µæµ    
+    input  wire                     Short_flag_i        ,//¶ÌÂ·²âÊÔ (STA/DYN)
+    input  wire        [AXI_REG_WIDTH-1: 0]I_short_i    ,//¶ÌÂ·Ê±À­ÔØµçÁ÷    
 
     input  wire        [  15: 0]    CC_k_i              ,
     input  wire        [  15: 0]    CC_a_i              ,
@@ -68,14 +68,14 @@ module pull_load_wrapper #(
 //---------------------------------------------------------------------
     integer                         i                   ;
 
-    wire               [AXI_REG_WIDTH-1: 0]SR_slew_i    ;//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    wire               [AXI_REG_WIDTH-1: 0]SF_slew_i    ;//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤ 
-    wire     signed    [AXI_REG_WIDTH+20-1: 0]SR_slew_period  ;//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    wire     signed    [AXI_REG_WIDTH+20-1: 0]SF_slew_period  ;//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    wire     signed    [AXI_REG_WIDTH+20-1: 0]CV_slew_period  ;//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    wire     signed    [AXI_REG_WIDTH+48-1: 0]CV_slew_period_temp  ;//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    wire     signed    [AXI_REG_WIDTH+48-1: 0]SR_slew_period_temp  ;//ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    wire     signed    [AXI_REG_WIDTH+48-1: 0]SF_slew_period_temp  ;//ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
+    wire               [AXI_REG_WIDTH-1: 0]SR_slew_i    ;//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    wire               [AXI_REG_WIDTH-1: 0]SF_slew_i    ;//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤ 
+    wire     signed    [AXI_REG_WIDTH+20-1: 0]SR_slew_period  ;//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    wire     signed    [AXI_REG_WIDTH+20-1: 0]SF_slew_period  ;//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    wire     signed    [AXI_REG_WIDTH+20-1: 0]CV_slew_period  ;//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    wire     signed    [AXI_REG_WIDTH+48-1: 0]CV_slew_period_temp  ;//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    wire     signed    [AXI_REG_WIDTH+48-1: 0]SR_slew_period_temp  ;//µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    wire     signed    [AXI_REG_WIDTH+48-1: 0]SF_slew_period_temp  ;//µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
 
     reg                             pull_on             [0:4]  ;// cc cv cp cr
     reg                             pull_precharge_en   [0:4]  ;
@@ -95,7 +95,7 @@ module pull_load_wrapper #(
     assign                          SF_slew_i          = pull_Fslew_i;
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// åˆ†é…
+// ·ÖÅä
 //---------------------------------------------------------------------
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
@@ -113,7 +113,7 @@ always@(posedge sys_clk_i)begin
         dac_data_limit_o <= 'd0;
     end
     else begin
-        //è¿™æ®µä»£ç çš„æ„æ€æ˜¯ï¼Œæ²¡æœ‰å£°æ˜çš„æƒ…å†µå°±èµ‹0
+        //Õâ¶Î´úÂëµÄÒâË¼ÊÇ£¬Ã»ÓĞÉùÃ÷µÄÇé¿ö¾Í¸³0
         for (i = 0; i<5; i=i+1) begin
             pull_on          [i] <= 'd0;
             pull_precharge_en[i] <= 'd0;
@@ -195,7 +195,7 @@ end
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// è®¡ç®—
+// ¼ÆËã
 //---------------------------------------------------------------------
 div_s48_s24 u_SR_slew_period (
     .aclk                           (sys_clk_i          ),// input wire aclk
@@ -250,16 +250,16 @@ u_pull_load_cc(
     .global_1us_flag_i              (global_1us_flag_i  ),
 
     .on_i                           (pull_on          [0]),
-    .precharge_en_i                 (pull_precharge_en[0]),// é¢„å……ä½¿èƒ½
-    .target_i                       (pull_target      [0]),// ç›®æ ‡å€¼mA
-    .initI_i                        (pull_initI       [0]),// åˆå§‹ç”µæµå€¼mA
-    .limitI_i                       (pull_limitI      [0]),// é™åˆ¶ç”µæµmA
-    .SR_slew_i                      (SR_slew_i          ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SF_slew_i                      (SF_slew_i          ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SR_slew_period_i               (SR_slew_period     ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .SF_slew_period_i               (SF_slew_period     ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .Short_flag_i                   (Short_flag_i       ),// çŸ­è·¯æµ‹è¯• (STA/DYN)
-    .I_short_i                      (I_short_i          ),// çŸ­è·¯æ—¶æ‹‰è½½ç”µæµ
+    .precharge_en_i                 (pull_precharge_en[0]),// Ô¤³äÊ¹ÄÜ
+    .target_i                       (pull_target      [0]),// Ä¿±êÖµmA
+    .initI_i                        (pull_initI       [0]),// ³õÊ¼µçÁ÷ÖµmA
+    .limitI_i                       (pull_limitI      [0]),// ÏŞÖÆµçÁ÷mA
+    .SR_slew_i                      (SR_slew_i          ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SF_slew_i                      (SF_slew_i          ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SR_slew_period_i               (SR_slew_period     ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .SF_slew_period_i               (SF_slew_period     ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .Short_flag_i                   (Short_flag_i       ),// ¶ÌÂ·²âÊÔ (STA/DYN)
+    .I_short_i                      (I_short_i          ),// ¶ÌÂ·Ê±À­ÔØµçÁ÷
     .k_i                            (CC_k_i             ),
     .b_i                            (CC_a_i             ),
     .pull_on_doing_o                (pull_on_doing   [0]),
@@ -285,20 +285,20 @@ u_pull_load_cp(
     .global_1us_flag_i              (global_1us_flag_i  ),
 
     .on_i                           (pull_on          [1]),
-    .precharge_en_i                 (pull_precharge_en[1]),// é¢„å……ä½¿èƒ½
-    .target_i                       (pull_target      [1]),// ç›®æ ‡å€¼mW
-    .initI_i                        (pull_initI       [1]),// åˆå§‹ç”µæµå€¼mA
-    .limitI_i                       (pull_limitI      [1]),// é™åˆ¶ç”µæµmA
-    .SR_slew_i                      (SR_slew_i          ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SF_slew_i                      (SF_slew_i          ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SR_slew_period_i               (SR_slew_period     ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .SF_slew_period_i               (SF_slew_period     ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .Short_flag_i                   (Short_flag_i       ),// çŸ­è·¯æµ‹è¯• (STA/DYN)
-    .I_short_i                      (I_short_i          ),// çŸ­è·¯æ—¶æ‹‰è½½ç”µæµ
+    .precharge_en_i                 (pull_precharge_en[1]),// Ô¤³äÊ¹ÄÜ
+    .target_i                       (pull_target      [1]),// Ä¿±êÖµmW
+    .initI_i                        (pull_initI       [1]),// ³õÊ¼µçÁ÷ÖµmA
+    .limitI_i                       (pull_limitI      [1]),// ÏŞÖÆµçÁ÷mA
+    .SR_slew_i                      (SR_slew_i          ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SF_slew_i                      (SF_slew_i          ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SR_slew_period_i               (SR_slew_period     ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .SF_slew_period_i               (SF_slew_period     ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .Short_flag_i                   (Short_flag_i       ),// ¶ÌÂ·²âÊÔ (STA/DYN)
+    .I_short_i                      (I_short_i          ),// ¶ÌÂ·Ê±À­ÔØµçÁ÷
     .k_i                            (CC_k_i             ),
     .b_i                            (CC_a_i             ),
     .U_abs_i                        (U_abs_i            ),// mV
-    .pull_on_doing_o                (pull_on_doing   [1]),// è¡¨é¢å½“å‰æ­£åœ¨è¿›è¡Œç”µæµè¾“å‡ºæ§åˆ¶
+    .pull_on_doing_o                (pull_on_doing   [1]),// ±íÃæµ±Ç°ÕıÔÚ½øĞĞµçÁ÷Êä³ö¿ØÖÆ
     .dac_data_valid_o               (dac_data_valid  [1]),
     .dac_data_o                     (dac_data        [1]),
     .dac_data_limit_o               (dac_data_limit  [1]) 
@@ -322,20 +322,20 @@ pull_load_cr#(
     .global_1us_flag_i              (global_1us_flag_i  ),
 
     .on_i                           (pull_on          [2]),
-    .precharge_en_i                 (pull_precharge_en[2]),// é¢„å……ä½¿èƒ½
-    .target_i                       (pull_target      [2]),// ç›®æ ‡å€¼ohm*10**-4
-    .initI_i                        (pull_initI       [2]),// åˆå§‹ç”µæµå€¼mA
-    .limitI_i                       (pull_limitI      [2]),// é™åˆ¶ç”µæµmA
-    .SR_slew_i                      (SR_slew_i          ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SF_slew_i                      (SF_slew_i          ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SR_slew_period_i               (SR_slew_period     ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .SF_slew_period_i               (SF_slew_period     ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .Short_flag_i                   (Short_flag_i       ),// çŸ­è·¯æµ‹è¯• (STA/DYN)
-    .I_short_i                      (I_short_i          ),// çŸ­è·¯æ—¶æ‹‰è½½ç”µæµ
+    .precharge_en_i                 (pull_precharge_en[2]),// Ô¤³äÊ¹ÄÜ
+    .target_i                       (pull_target      [2]),// Ä¿±êÖµohm*10**-4
+    .initI_i                        (pull_initI       [2]),// ³õÊ¼µçÁ÷ÖµmA
+    .limitI_i                       (pull_limitI      [2]),// ÏŞÖÆµçÁ÷mA
+    .SR_slew_i                      (SR_slew_i          ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SF_slew_i                      (SF_slew_i          ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SR_slew_period_i               (SR_slew_period     ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .SF_slew_period_i               (SF_slew_period     ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .Short_flag_i                   (Short_flag_i       ),// ¶ÌÂ·²âÊÔ (STA/DYN)
+    .I_short_i                      (I_short_i          ),// ¶ÌÂ·Ê±À­ÔØµçÁ÷
     .k_i                            (CC_k_i             ),
     .b_i                            (CC_a_i             ),
     .U_abs_i                        (U_abs_i            ),// mV
-    .pull_on_doing_o                (pull_on_doing   [2]),// è¡¨é¢å½“å‰æ­£åœ¨è¿›è¡Œç”µæµè¾“å‡ºæ§åˆ¶
+    .pull_on_doing_o                (pull_on_doing   [2]),// ±íÃæµ±Ç°ÕıÔÚ½øĞĞµçÁ÷Êä³ö¿ØÖÆ
     .dac_data_valid_o               (dac_data_valid  [2]),
     .dac_data_o                     (dac_data        [2]),
     .dac_data_limit_o               (dac_data_limit  [2]) 
@@ -355,29 +355,29 @@ pull_load_software_cv#(
 u_pull_load_software_cv(
     .sys_clk_i                      (sys_clk_i          ),
     .rst_n_i                        (rst_n_i            ),
-    .Von_i                          (Von_i              ),// å¼€å¯ç”µå‹mV
+    .Von_i                          (Von_i              ),// ¿ªÆôµçÑ¹mV
     .global_1us_flag_i              (global_1us_flag_i  ),
 
     .on_i                           (pull_on          [3]),
-    .target_i                       (pull_target      [3]),// ç›®æ ‡å€¼mV
-    .initI_i                        (pull_initI       [3]),// åˆå§‹ç”µæµå€¼mA
-    .limitI_i                       (pull_limitI      [3]),// é™åˆ¶ç”µæµmA
-    .CV_slew_i                      (CV_slew_i          ),// CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)
-    .CV_slew_period_i               (CV_slew_period     ),// CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)
-    .SR_slew_i                      (SR_slew_i          ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SF_slew_i                      (SF_slew_i          ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SR_slew_period_i               (SR_slew_period     ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .SF_slew_period_i               (SF_slew_period     ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .Short_flag_i                   (Short_flag_i       ),// çŸ­è·¯æµ‹è¯• (STA/DYN)
-    .I_short_i                      (I_short_i          ),// çŸ­è·¯æ—¶æ‹‰è½½ç”µæµ
+    .target_i                       (pull_target      [3]),// Ä¿±êÖµmV
+    .initI_i                        (pull_initI       [3]),// ³õÊ¼µçÁ÷ÖµmA
+    .limitI_i                       (pull_limitI      [3]),// ÏŞÖÆµçÁ÷mA
+    .CV_slew_i                      (CV_slew_i          ),// CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)
+    .CV_slew_period_i               (CV_slew_period     ),// CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)
+    .SR_slew_i                      (SR_slew_i          ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SF_slew_i                      (SF_slew_i          ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SR_slew_period_i               (SR_slew_period     ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .SF_slew_period_i               (SF_slew_period     ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .Short_flag_i                   (Short_flag_i       ),// ¶ÌÂ·²âÊÔ (STA/DYN)
+    .I_short_i                      (I_short_i          ),// ¶ÌÂ·Ê±À­ÔØµçÁ÷
     .k_i                            (CC_k_i             ),
     .b_i                            (CC_a_i             ),
-    .KP_i                           (KP_i               ),// æ¯”ä¾‹ç³»æ•°*2^16
-    .KI_i                           (KI_i               ),// ç§¯åˆ†ç³»æ•°*2^16
-    .KD_i                           (KD_i               ),// å¾®åˆ†ç³»æ•°*2^16
+    .KP_i                           (KP_i               ),// ±ÈÀıÏµÊı*2^16
+    .KI_i                           (KI_i               ),// »ı·ÖÏµÊı*2^16
+    .KD_i                           (KD_i               ),// Î¢·ÖÏµÊı*2^16
     .U_abs_i                        (U_abs_i            ),// mV
     .I_abs_i                        (I_abs_i            ),// mV
-    .pull_on_doing_o                (pull_on_doing   [3]),// è¡¨é¢å½“å‰æ­£åœ¨è¿›è¡Œç”µæµè¾“å‡ºæ§åˆ¶
+    .pull_on_doing_o                (pull_on_doing   [3]),// ±íÃæµ±Ç°ÕıÔÚ½øĞĞµçÁ÷Êä³ö¿ØÖÆ
     .dac_data_valid_o               (dac_data_valid  [3]),
     .dac_data_o                     (dac_data        [3]),
     .dac_data_limit_o               (dac_data_limit  [3]) 
@@ -399,22 +399,22 @@ u_pull_load_hardware_cv(
     .global_1us_flag_i              (global_1us_flag_i  ),
 
     .on_i                           (pull_on          [4]),
-    .target_i                       (pull_target      [4]),// ç›®æ ‡å€¼mV
-    .initI_i                        (pull_initI       [4]),// åˆå§‹ç”µæµå€¼mA
-    .limitI_i                       (pull_limitI      [4]),// é™åˆ¶ç”µæµmA
-    .CV_slew_i                      (CV_slew_i          ),// CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)
-    .CV_slew_period_i               (CV_slew_period     ),// CVæ¨¡å¼ç”µå‹å˜åŒ–æ–œç‡(1mV/ms)
-    .SR_slew_i                      (SR_slew_i          ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SF_slew_i                      (SF_slew_i          ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/ms éœ€è¦ä¿æŠ¤
-    .SR_slew_period_i               (SR_slew_period     ),// ç”µæµä¸Šå‡æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .SF_slew_period_i               (SF_slew_period     ),// ç”µæµä¸‹é™æ–œç‡å•ä½1mA/10ns(every period) slew_ié™¤ä»¥100_000
-    .Short_flag_i                   (Short_flag_i       ),// çŸ­è·¯æµ‹è¯• (STA/DYN)
-    .k_i                            (CC_k_i             ),//CV limitæ ¡å‡†
+    .target_i                       (pull_target      [4]),// Ä¿±êÖµmV
+    .initI_i                        (pull_initI       [4]),// ³õÊ¼µçÁ÷ÖµmA
+    .limitI_i                       (pull_limitI      [4]),// ÏŞÖÆµçÁ÷mA
+    .CV_slew_i                      (CV_slew_i          ),// CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)
+    .CV_slew_period_i               (CV_slew_period     ),// CVÄ£Ê½µçÑ¹±ä»¯Ğ±ÂÊ(1mV/ms)
+    .SR_slew_i                      (SR_slew_i          ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SF_slew_i                      (SF_slew_i          ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/ms ĞèÒª±£»¤
+    .SR_slew_period_i               (SR_slew_period     ),// µçÁ÷ÉÏÉıĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .SF_slew_period_i               (SF_slew_period     ),// µçÁ÷ÏÂ½µĞ±ÂÊµ¥Î»1mA/10ns(every period) slew_i³ıÒÔ100_000
+    .Short_flag_i                   (Short_flag_i       ),// ¶ÌÂ·²âÊÔ (STA/DYN)
+    .k_i                            (CC_k_i             ),//CV limitĞ£×¼
     .b_i                            (CC_a_i             ),
-    .k_cv_i                         (CV_k_i             ),//CV targetæ ¡å‡†
+    .k_cv_i                         (CV_k_i             ),//CV targetĞ£×¼
     .b_cv_i                         (CV_a_i             ),
     .U_abs_i                        (U_abs_i            ),// mV
-    .pull_on_doing_o                (pull_on_doing   [4]),// è¡¨é¢å½“å‰æ­£åœ¨è¿›è¡Œç”µæµè¾“å‡ºæ§åˆ¶
+    .pull_on_doing_o                (pull_on_doing   [4]),// ±íÃæµ±Ç°ÕıÔÚ½øĞĞµçÁ÷Êä³ö¿ØÖÆ
     .dac_data_valid_o               (dac_data_valid  [4]),
     .dac_data_o                     (dac_data        [4]),
     .dac_data_limit_o               (dac_data_limit  [4]) 

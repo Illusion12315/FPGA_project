@@ -34,7 +34,7 @@ module get_INV_alarm #(
 
     assign                          limit              = 300;//0.3V
 
-    //å¿…é¡»æ˜¯è´Ÿæ•°ï¼Œä¸”ç»å¯¹å€¼å¤§äº0.3V
+    //±ØĞëÊÇ¸ºÊı£¬ÇÒ¾ø¶ÔÖµ´óÓÚ0.3V
     assign                          Umod_inv_alarm_o   = Umod_rt_i[CALCULATE_WIDTH-1] && Umod_inv_alarm_temp;
     assign                          Usense_inv_alarm_o = Usense_rt_i[CALCULATE_WIDTH-1] && Usense_inv_alarm_temp;
 
@@ -46,9 +46,9 @@ u_Umod_inv_alarm(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (100_000            ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (limit              ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (signed2unsigned(Umod_rt_i)),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (100_000            ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (limit              ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (signed2unsigned(Umod_rt_i)),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (Umod_inv_alarm_temp) 
 );
@@ -61,9 +61,9 @@ u_Usense_inv_alarm(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (100_000            ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (limit              ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (signed2unsigned(Usense_rt_i)),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (100_000            ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (limit              ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (signed2unsigned(Usense_rt_i)),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (Usense_inv_alarm_temp) 
 );

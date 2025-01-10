@@ -21,17 +21,17 @@ module get_ovcp_wrapper #(
     input  wire                     rst_n_i             ,
     input  wire                     global_1us_flag_i   ,
 //max
-    input  wire        [CALCULATE_WIDTH-1: 0]U_max_i    ,//æœ€å¤§ç”µå‹é™åˆ¶
-    input  wire        [CALCULATE_WIDTH-1: 0]I_max_i    ,//æœ€å¤§ç”µæµé™åˆ¶
-    input  wire        [CALCULATE_WIDTH-1: 0]P_max_i    ,//æœ€å¤§åŠŸç‡é™åˆ¶
+    input  wire        [CALCULATE_WIDTH-1: 0]U_max_i    ,//×î´óµçÑ¹ÏŞÖÆ
+    input  wire        [CALCULATE_WIDTH-1: 0]I_max_i    ,//×î´óµçÁ÷ÏŞÖÆ
+    input  wire        [CALCULATE_WIDTH-1: 0]P_max_i    ,//×î´ó¹¦ÂÊÏŞÖÆ
 //max
-    input  wire        [CALCULATE_WIDTH-1: 0]U_limit_i  ,//ç”µå‹é™åˆ¶
-    input  wire        [CALCULATE_WIDTH-1: 0]I_limit_i  ,//ç”µæµé™åˆ¶
-    input  wire        [CALCULATE_WIDTH-1: 0]P_limit_i  ,//åŠŸç‡é™åˆ¶
-    input  wire        [  15: 0]    Pro_time_i          ,//1-ç«‹å³ä¿æŠ¤ï¼›10-1mSï¼›20-2mSâ€¦â€¦150-15mS
-//å®æ—¶çš„é‡‡æ ·æ•°æ®
-    input  wire signed [CALCULATE_WIDTH-1: 0]U_rt_i     ,//å®æ—¶é‡‡æ ·ç”µå‹
-    input  wire signed [CALCULATE_WIDTH-1: 0]I_rt_i     ,//å®æ—¶é‡‡æ ·ç”µæµ
+    input  wire        [CALCULATE_WIDTH-1: 0]U_limit_i  ,//µçÑ¹ÏŞÖÆ
+    input  wire        [CALCULATE_WIDTH-1: 0]I_limit_i  ,//µçÁ÷ÏŞÖÆ
+    input  wire        [CALCULATE_WIDTH-1: 0]P_limit_i  ,//¹¦ÂÊÏŞÖÆ
+    input  wire        [  15: 0]    Pro_time_i          ,//1-Á¢¼´±£»¤£»10-1mS£»20-2mS¡­¡­150-15mS
+//ÊµÊ±µÄ²ÉÑùÊı¾İ
+    input  wire signed [CALCULATE_WIDTH-1: 0]U_rt_i     ,//ÊµÊ±²ÉÑùµçÑ¹
+    input  wire signed [CALCULATE_WIDTH-1: 0]I_rt_i     ,//ÊµÊ±²ÉÑùµçÁ÷
     input  wire signed [  31: 0]    P_rt_i              ,
 
     input  wire                     Clear_alarm_ON_i    ,//
@@ -68,13 +68,13 @@ module get_ovcp_wrapper #(
     wire                            ocp_U_max_alarm     ;
 
     assign                          ovp_maxU_alarm_o   = ocp_U_max_alarm;
-    assign                          ocp_maxI_alarm_o   = ocp_I_max_1R12_alarm || ocp_I_max_1R03_alarm;// 1 2çº§åˆ«ä¿æŠ¤
+    assign                          ocp_maxI_alarm_o   = ocp_I_max_1R12_alarm || ocp_I_max_1R03_alarm;// 1 2¼¶±ğ±£»¤
     assign                          ocp_alarm_o        = ocp_I_limit_alarm;
-    assign                          opp_maxP_alarm_o   = ocp_P_max_1R12_alarm || ocp_P_max_2R25_alarm || ocp_P_max_4R00_alarm;// 1 2 3çº§åˆ«ä¿æŠ¤
+    assign                          opp_maxP_alarm_o   = ocp_P_max_1R12_alarm || ocp_P_max_2R25_alarm || ocp_P_max_4R00_alarm;// 1 2 3¼¶±ğ±£»¤
     assign                          opp_alarm_o        = ocp_P_limit_alarm;
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// è®¡ç®—ä¿æŠ¤æ—¶é—´
+// ¼ÆËã±£»¤Ê±¼ä
 //---------------------------------------------------------------------
     reg                [  23: 0]    sw_pro_time         ;
 
@@ -88,12 +88,12 @@ always@(posedge sys_clk_i)begin
 end
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// ç”µæµå³°å€¼ä¿æŠ¤OCP MAX
+// µçÁ÷·åÖµ±£»¤OCP MAX
 //---------------------------------------------------------------------
 
 mult_x_fixed_point#(
-    .FIXED_POINT                    (1.12               ),//xä¹˜ä»¥çš„å®šç‚¹æ•°
-    .MULTIPLE                       (8                  ) //è®¡ç®—æ—¶æ‰©å¤§2**MULTIPLEå€
+    .FIXED_POINT                    (1.12               ),//x³ËÒÔµÄ¶¨µãÊı
+    .MULTIPLE                       (8                  ) //¼ÆËãÊ±À©´ó2**MULTIPLE±¶
 )
 u_I_max_1R12(
     .sys_clk_i                      (sys_clk_i          ),
@@ -109,16 +109,16 @@ u_I_max_1R12_protect(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (0                  ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (I_max_1R12         ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (I_rt_i             ),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (0                  ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (I_max_1R12         ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (I_rt_i             ),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (ocp_I_max_1R12_alarm) 
 );
 
 mult_x_fixed_point#(
-    .FIXED_POINT                    (1.03               ),//xä¹˜ä»¥çš„å®šç‚¹æ•°
-    .MULTIPLE                       (8                  ) //è®¡ç®—æ—¶æ‰©å¤§2**MULTIPLEå€
+    .FIXED_POINT                    (1.03               ),//x³ËÒÔµÄ¶¨µãÊı
+    .MULTIPLE                       (8                  ) //¼ÆËãÊ±À©´ó2**MULTIPLE±¶
 )
 u_I_max_1R03(
     .sys_clk_i                      (sys_clk_i          ),
@@ -134,16 +134,16 @@ u_I_max_1R03_protect(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (2000               ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (I_max_1R03         ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (I_rt_i             ),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (2000               ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (I_max_1R03         ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (I_rt_i             ),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (ocp_I_max_1R03_alarm) 
 );
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// ç”µæµä¿æŠ¤OCPï¼Œé¢„è®¾å€¼
+// µçÁ÷±£»¤OCP£¬Ô¤ÉèÖµ
 //---------------------------------------------------------------------
 get_protect #(
     .CALCULATE_WIDTH                (CALCULATE_WIDTH    ) 
@@ -153,20 +153,20 @@ u_I_limit_protect(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (sw_pro_time        ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (I_limit_i          ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (I_rt_i             ),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (sw_pro_time        ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (I_limit_i          ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (I_rt_i             ),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (ocp_I_limit_alarm  ) 
 );
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// åŠŸç‡å³°å€¼ä¿æŠ¤OPP MAX
+// ¹¦ÂÊ·åÖµ±£»¤OPP MAX
 //---------------------------------------------------------------------
 mult_x_fixed_point#(
-    .FIXED_POINT                    (4                  ),//xä¹˜ä»¥çš„å®šç‚¹æ•°
-    .MULTIPLE                       (8                  ) //è®¡ç®—æ—¶æ‰©å¤§2**MULTIPLEå€
+    .FIXED_POINT                    (4                  ),//x³ËÒÔµÄ¶¨µãÊı
+    .MULTIPLE                       (8                  ) //¼ÆËãÊ±À©´ó2**MULTIPLE±¶
 )
 u_P_max_4R00(
     .sys_clk_i                      (sys_clk_i          ),
@@ -182,17 +182,17 @@ u_P_max_4R00_protect(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (0                  ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (P_max_4R00         ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (P_rt_i             ),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (0                  ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (P_max_4R00         ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (P_rt_i             ),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (ocp_P_max_4R00_alarm) 
 );
 
 
 mult_x_fixed_point#(
-    .FIXED_POINT                    (2.25               ),//xä¹˜ä»¥çš„å®šç‚¹æ•°
-    .MULTIPLE                       (8                  ) //è®¡ç®—æ—¶æ‰©å¤§2**MULTIPLEå€
+    .FIXED_POINT                    (2.25               ),//x³ËÒÔµÄ¶¨µãÊı
+    .MULTIPLE                       (8                  ) //¼ÆËãÊ±À©´ó2**MULTIPLE±¶
 )
 u_P_max_2R25(
     .sys_clk_i                      (sys_clk_i          ),
@@ -208,16 +208,16 @@ u_P_max_2R25_protect(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (40                 ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (P_max_2R25         ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (P_rt_i             ),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (40                 ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (P_max_2R25         ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (P_rt_i             ),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (ocp_P_max_2R25_alarm) 
 );
 
 mult_x_fixed_point#(
-    .FIXED_POINT                    (1.12               ),//xä¹˜ä»¥çš„å®šç‚¹æ•°
-    .MULTIPLE                       (8                  ) //è®¡ç®—æ—¶æ‰©å¤§2**MULTIPLEå€
+    .FIXED_POINT                    (1.12               ),//x³ËÒÔµÄ¶¨µãÊı
+    .MULTIPLE                       (8                  ) //¼ÆËãÊ±À©´ó2**MULTIPLE±¶
 )
 u_P_max_1R12(
     .sys_clk_i                      (sys_clk_i          ),
@@ -233,16 +233,16 @@ u_P_max_1R12_protect(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (2400               ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (P_max_1R12         ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (P_rt_i             ),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (2400               ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (P_max_1R12         ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (P_rt_i             ),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (ocp_P_max_1R12_alarm) 
 );
 
 // mult_x_fixed_point#(
-//     .FIXED_POINT                    (1.03               ),//xä¹˜ä»¥çš„å®šç‚¹æ•°
-//     .MULTIPLE                       (8                  ) //è®¡ç®—æ—¶æ‰©å¤§2**MULTIPLEå€
+//     .FIXED_POINT                    (1.03               ),//x³ËÒÔµÄ¶¨µãÊı
+//     .MULTIPLE                       (8                  ) //¼ÆËãÊ±À©´ó2**MULTIPLE±¶
 // )
 // u_P_max_1R03(
 //     .sys_clk_i                      (sys_clk_i          ),
@@ -258,16 +258,16 @@ u_P_max_1R12_protect(
 //     .rst_n_i                        (rst_n_i            ),
 
 //     .global_1us_flag_i              (global_1us_flag_i  ),
-//     .protect_time_i                 (20_000             ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-//     .protect_limit_i                (P_max_1R03         ),//éƒ½æ˜¯ç»å¯¹å€¼
-//     .protect_signal_i               (P_rt_i             ),//éƒ½æ˜¯ç»å¯¹å€¼
+//     .protect_time_i                 (20_000             ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+//     .protect_limit_i                (P_max_1R03         ),//¶¼ÊÇ¾ø¶ÔÖµ
+//     .protect_signal_i               (P_rt_i             ),//¶¼ÊÇ¾ø¶ÔÖµ
 //     .protect_clear_i                (Clear_alarm_ON_i   ),
 //     .protect_alarm_o                (ocp_P_max_1R03_alarm) 
 // );
 
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// åŠŸç‡ä¿æŠ¤OPP 
+// ¹¦ÂÊ±£»¤OPP 
 //---------------------------------------------------------------------
 get_protect #(
     .CALCULATE_WIDTH                (CALCULATE_WIDTH    ) 
@@ -277,9 +277,9 @@ u_P_limit_protect(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (sw_pro_time        ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (P_limit_i          ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (P_rt_i             ),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (sw_pro_time        ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (P_limit_i          ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (P_rt_i             ),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (ocp_P_limit_alarm  ) 
 );
@@ -300,9 +300,9 @@ u_U_max_protect(
     .rst_n_i                        (rst_n_i            ),
 
     .global_1us_flag_i              (global_1us_flag_i  ),
-    .protect_time_i                 (100_000            ),//å•ä½,us,å¦‚æœä¸º0ä»£è¡¨ç«‹å³ä¿æŠ¤
-    .protect_limit_i                (U_max_add_500      ),//éƒ½æ˜¯ç»å¯¹å€¼
-    .protect_signal_i               (U_rt_i             ),//éƒ½æ˜¯ç»å¯¹å€¼
+    .protect_time_i                 (100_000            ),//µ¥Î»,us,Èç¹ûÎª0´ú±íÁ¢¼´±£»¤
+    .protect_limit_i                (U_max_add_500      ),//¶¼ÊÇ¾ø¶ÔÖµ
+    .protect_signal_i               (U_rt_i             ),//¶¼ÊÇ¾ø¶ÔÖµ
     .protect_clear_i                (Clear_alarm_ON_i   ),
     .protect_alarm_o                (ocp_U_max_alarm    ) 
 );

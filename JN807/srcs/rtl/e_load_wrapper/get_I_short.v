@@ -72,7 +72,7 @@ div_s48_s24 u_target_current (
     .m_axis_dout_tdata              (P_div_U_temp       ) // output wire [71 : 0] m_axis_dout_tdata
 );
 
-    assign                          P_div_U            = P_div_U_temp[AXI_REG_WIDTH+CALCULATE_WIDTH+24-1:24];//È¡ÉÌ
+    assign                          P_div_U            = P_div_U_temp[AXI_REG_WIDTH+CALCULATE_WIDTH+24-1:24];//????
 
 always@(posedge sys_clk_i)begin
     if (min_I > P_div_U) begin

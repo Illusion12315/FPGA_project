@@ -41,49 +41,49 @@ module top
     inout  wire                     rtc_rstn_o          ,//JN807 GPIO13
     inout  wire                     rtc_scl_o           ,//JN807 GPIO9
     inout  wire                     rtc_sda_io          ,//JN807 GPIO21
-//æ¨¡æ‹Ÿç”µæºæ‰ç”µæ£€æµ‹                                          
-    input  wire                     vop_pos_pg_i        ,//JN807 GPIO29 æ­£ç”µæº
-    input  wire                     vop_neg_pg_i        ,//JN807 GPIO25 è´Ÿç”µæº
-// æ¸©æ§                                
-    input  wire                     tmp275_alert_i      ,// GPIO65 æ¸©åº¦å‘Šè­¦
-    // output                          o_tmp275_scl        ,// PS_MIO46 ç”¨GPIOæ¨¡æ‹Ÿå‡ºIICæ¥å£
-    // inout                           io_tmp275_sda       ,// PS_MIO47 ç”¨GPIOæ¨¡æ‹Ÿå‡ºIICæ¥å£
-//å¯¹å¤–å¹¶æœºIO                           
-    output wire                     o_fpga_m_s          ,// GPIO81 éš”ç¦»èŠ¯ç‰‡VE1
-    inout  wire        [   1: 0]    io_fpga_trig        ,// GPIO78/GPIO74 éš”ç¦»èŠ¯ç‰‡VIA/VIB/VOC/VOD
-//å¹¶æœºæ¨¡æ‹Ÿä¿¡å·æ§åˆ¶å¼€å…³                 
-    output wire                     o_p_sw2_fpga        ,//JN807 GPIO93 å¹¶æœºä¿¡å·è¾“å‡ºæ§åˆ¶
-    output wire                     o_p_sw1_fpga        ,//JN807 GPIO89 å¹¶æœºä¿¡å·è¾“å‡ºæ§åˆ¶
-    output wire                     o_vmod_sw_fpga      ,//JN807 GPIO101 Vmodæ¡£ä½æ§åˆ¶
-    output wire                     o_vsense_sw_fpga    ,//JN807 GPIO97  Vsenseæ¡£ä½æ§åˆ¶
-//å•é€šé“ç”µæµé‡‡é›†                       
+//Ä£ÄâµçÔ´µôµç¼ì²â                                          
+    input  wire                     vop_pos_pg_i        ,//JN807 GPIO29 ÕıµçÔ´
+    input  wire                     vop_neg_pg_i        ,//JN807 GPIO25 ¸ºµçÔ´
+// ÎÂ¿Ø                                
+    input  wire                     tmp275_alert_i      ,// GPIO65 ÎÂ¶È¸æ¾¯
+    // output                          o_tmp275_scl        ,// PS_MIO46 ÓÃGPIOÄ£Äâ³öIIC½Ó¿Ú
+    // inout                           io_tmp275_sda       ,// PS_MIO47 ÓÃGPIOÄ£Äâ³öIIC½Ó¿Ú
+//¶ÔÍâ²¢»úIO                           
+    output wire                     o_fpga_m_s          ,// GPIO81 ¸ôÀëĞ¾Æ¬VE1
+    inout  wire        [   1: 0]    io_fpga_trig        ,// GPIO78/GPIO74 ¸ôÀëĞ¾Æ¬VIA/VIB/VOC/VOD
+//²¢»úÄ£ÄâĞÅºÅ¿ØÖÆ¿ª¹Ø                 
+    output wire                     o_p_sw2_fpga        ,//JN807 GPIO93 ²¢»úĞÅºÅÊä³ö¿ØÖÆ
+    output wire                     o_p_sw1_fpga        ,//JN807 GPIO89 ²¢»úĞÅºÅÊä³ö¿ØÖÆ
+    output wire                     o_vmod_sw_fpga      ,//JN807 GPIO101 VmodµµÎ»¿ØÖÆ
+    output wire                     o_vsense_sw_fpga    ,//JN807 GPIO97  VsenseµµÎ»¿ØÖÆ
+//µ¥Í¨µÀµçÁ÷²É¼¯                       
     output wire                     o_en_sample         ,//JN807 GPIO133
     output wire        [   2: 0]    o_sel_sample        ,// GPIO129/GPIO141/GPIO137
 //flash                                
     output wire                     o_flash_csn         ,// GPIO149
     output wire                     o_flash_sclk        ,// GPIO165
     inout  wire        [   3: 0]    io_flash_io         ,// GPIO161/GPIO145/GPIO157/GPIO153
-//é£æ‰‡æ•…éšœ                                                   
+//·çÉÈ¹ÊÕÏ                                                   
     input  wire        [   7: 0]    fault_pan_i         ,//GPIO2/GPIO14/GPIO10/GPIO22/GPIO18/GPIO30/GPIO178/GPIO182
-//ç¡¬ä»¶è¿‡æµä¿æŠ¤åé¦ˆ                     
+//Ó²¼ş¹ıÁ÷±£»¤·´À¡                     
     input  wire                     ocp_da_trig_i       ,//GPIO26   
-//CANFDå¹¶æœº                            
+//CANFD²¢»ú                            
     input  wire                     canfd_0_rx_i        ,//JN807 GPIO38
     output wire                     canfd_0_tx_o        ,//JN807 GPIO34
-//CANFDå±å¹•                            
+//CANFDÆÁÄ»                            
     input  wire                     canfd_1_rx_o        ,//JN807 GPIO46
     output wire                     canfd_1_tx_o        ,//JN807 GPIO42
-//HMIé€šä¿¡                              
+//HMIÍ¨ĞÅ                              
     input  wire                     uart_rtl_0_rxd_i    ,//GPIO70
     output wire                     uart_rtl_0_txd_o    ,//GPIO66
-//æ•´æœºå¯¹å¤–é€šä¿¡æ¥å£                     
+//Õû»ú¶ÔÍâÍ¨ĞÅ½Ó¿Ú                     
     input  wire                     uart_rtl_1_rxd_i    ,//JN807 GPIO62
     output wire                     uart_rtl_1_txd_o    ,//JN807 GPIO58
 //SW                                   
-    output wire                     o_fpga_sw           ,//GPIO86 DAç¯è·¯è¾“å‡ºå¼€å…³
+    output wire                     o_fpga_sw           ,//GPIO86 DA»·Â·Êä³ö¿ª¹Ø
 //CV_limit_FPGA//CV_LIM_SWTICH_Trig//CC_CV_FPGA//Vin_select_FPGA//CV_SP_SLOW_FPGA//CV_SP_MID_FPGA//CV_SP_FAST_FPGA
     output wire                     o_cv_limit          ,//JN807 GPIO82
-    input  wire                     cv_limit_switch_i   ,//JN807 GPIO94 CV_LIMåˆ¤æ–­åé¦ˆ
+    input  wire                     cv_limit_switch_i   ,//JN807 GPIO94 CV_LIMÅĞ¶Ï·´À¡
     output wire                     o_cv_cc             ,//JN807 GPIO90
     output wire                     o_vin_sel           ,//JN807 GPIO102
     output wire                     o_cv_sp_slow        ,//JN807 GPIO98
@@ -91,11 +91,11 @@ module top
     output wire                     o_cv_sp_fast        ,//JN807 GPIO106
 //debug led                             
     output wire                     o_debug_led         ,//GPIO130
-//æ‹¨ç                                   
+//²¦Âë                                  
     input  wire        [   3: 0]    dip_switch_i        ,//GPIO142/GPIO138/GPIO150/GPIO146
-//å¤–éƒ¨æ‹¨ç                               
+//Íâ²¿²¦Âë                              
     input  wire        [   2: 0]    out_dip_switch_i    ,//GPIO158/GPIO154/GPIO166
-//ADC AD7606 ç”µæµç”µå‹é‡‡é›†
+//ADC AD7606 µçÁ÷µçÑ¹²É¼¯
     input  wire                     i_ad7606_busy       ,//GPIO23
     output wire                     o_ad7606_rst        ,//GPIO19
     output wire                     o_ad7606_convst     ,//GPIO3
@@ -110,7 +110,7 @@ module top
     output wire                     o_ad5689_sclk       ,//GPIO99
     input  wire                     i_ad5689_miso       ,//GPIO96
     output wire                     o_ad5689_mosi       ,//GPIO92
-//ADC ADS131 æ•£çƒ­å™¨æ¸©åº¦é‡‡é›† 
+//ADC ADS131 É¢ÈÈÆ÷ÎÂ¶È²É¼¯ 
     output wire                     o_ads131_rstn       ,//JN807 GPIO111
     input  wire                     i_ads131_rdyn       ,//JN807 GPIO107
     output wire                     o_ads131_sclk       ,//JN807 GPIO120
@@ -121,7 +121,7 @@ module top
     output wire                     fan_pwm_o            //,//GPIO104
 );
 
-    wire                            clk_100m            ;// ç³»ç»Ÿä¸»é¢‘æ˜¯100mhz
+    wire                            clk_100m            ;// ÏµÍ³Ö÷ÆµÊÇ100mhz
     wire                            rstn_100m           ;
     wire                            clk_50m             ;
     wire                            rstn_50m            ;
@@ -189,7 +189,7 @@ module top
     wire               [   0: 0]    m04_axi_wready      ;
     wire               [   3: 0]    m04_axi_wstrb       ;
     wire               [   0: 0]    m04_axi_wvalid      ;
-//ç”µå­è´Ÿè½½
+//µç×Ó¸ºÔØ
     wire               [  31: 0]    m05_axi_araddr      ;
     wire               [   2: 0]    m05_axi_arprot      ;
     wire               [   0: 0]    m05_axi_arready     ;
@@ -209,7 +209,7 @@ module top
     wire               [   0: 0]    m05_axi_wready      ;
     wire               [   3: 0]    m05_axi_wstrb       ;
     wire               [   0: 0]    m05_axi_wvalid      ;
-//ADS131M08é‡‡é›†çš„æ¸©åº¦Codeç 
+//ADS131M08²É¼¯µÄÎÂ¶ÈCodeÂë
     wire               [  31: 0]    ch0_temp            ;//0000
     wire               [  31: 0]    ch1_temp            ;//0001
     wire               [  31: 0]    ch2_temp            ;//0002
@@ -220,20 +220,20 @@ module top
     wire               [  31: 0]    ch7_temp            ;//0007
 										 
     wire               [   1: 0]    gpio_eload_tri_o    ;
-    wire               [   2: 0]    GPIO_0_tri_io       ;//RTCç”¨GPIOæ¨¡æ‹ŸCE/SCLK/IO,å…¶ä¸­IOä¸ºinout
-//ADC é‡‡æ ·å€¼  äºŒè¿›åˆ¶è¡¥ç    +-
-//ADC_codeç 
+    wire               [   2: 0]    GPIO_0_tri_io       ;//RTCÓÃGPIOÄ£ÄâCE/SCLK/IO,ÆäÖĞIOÎªinout
+//ADC ²ÉÑùÖµ  ¶ş½øÖÆ²¹Âë   +-
+//ADC_codeÂë
     wire                            adc_acq_valid       ;
-    wire     signed    [  15: 0]    HI_sum              ;//I_SUM_H_AD----é«˜æ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ4.521V
-    wire     signed    [  15: 0]    LI_sum              ;//I_SUM_L_AD----ä½æ¡£ä½8è·¯æ¿å¡æ±‡æ€»ç”µæµ
-    wire     signed    [  15: 0]    HI_board            ;//I_BOARD_H_AD----é«˜æ¡£ä½æ¿å¡ç”µæµ4.5V
-    wire     signed    [  15: 0]    LI_board            ;//I_BOARD_L_AD----ä½æ¡£ä½æ¿å¡ç”µæµ
-    wire     signed    [  15: 0]    U_mod               ;//AD_Vmod----ésenseç«¯ç”µå‹
-    wire     signed    [  15: 0]    U_sense             ;//AD_Vsense----senseç«¯ç”µå‹
-    wire     signed    [  15: 0]    I_sum_unit          ;//I_SUM_UNIT_AD----å•æ¿å¡24æ¨¡å—æ±‡æ€»ç”µæµ4.125V
-    wire     signed    [  15: 0]    I_board_unit        ;//I_BOARD_UNIT_AD----å•æ¿å¡å•æ¨¡å—ç”µæµ3.4375V
-//DAC è¾“å‡º //æ§åˆ¶MOSç®¡çš„Vgsç”µå‹è¿›è€Œæ§åˆ¶Ids (MOSç®¡å¿…é¡»å·¥ä½œåœ¨çº¿æ€§åŒºé—´)
-//DAC_codeç 
+    wire     signed    [  15: 0]    HI_sum              ;//I_SUM_H_AD----¸ßµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷4.521V
+    wire     signed    [  15: 0]    LI_sum              ;//I_SUM_L_AD----µÍµµÎ»8Â·°å¿¨»ã×ÜµçÁ÷
+    wire     signed    [  15: 0]    HI_board            ;//I_BOARD_H_AD----¸ßµµÎ»°å¿¨µçÁ÷4.5V
+    wire     signed    [  15: 0]    LI_board            ;//I_BOARD_L_AD----µÍµµÎ»°å¿¨µçÁ÷
+    wire     signed    [  15: 0]    U_mod               ;//AD_Vmod----·Çsense¶ËµçÑ¹
+    wire     signed    [  15: 0]    U_sense             ;//AD_Vsense----sense¶ËµçÑ¹
+    wire     signed    [  15: 0]    I_sum_unit          ;//I_SUM_UNIT_AD----µ¥°å¿¨24Ä£¿é»ã×ÜµçÁ÷4.125V
+    wire     signed    [  15: 0]    I_board_unit        ;//I_BOARD_UNIT_AD----µ¥°å¿¨µ¥Ä£¿éµçÁ÷3.4375V
+//DAC Êä³ö //¿ØÖÆMOS¹ÜµÄVgsµçÑ¹½ø¶ø¿ØÖÆIds (MOS¹Ü±ØĞë¹¤×÷ÔÚÏßĞÔÇø¼ä)
+//DAC_codeÂë
     wire                            dac_cha_valid       ;
     wire               [  15: 0]    dac_cha_data        ;
     wire                            dac_chb_valid       ;
@@ -247,7 +247,7 @@ module top
     assign                          rtc_scl_o          = GPIO_0_tri_io[1];
     assign                          rtc_sda_io         = GPIO_0_tri_io[2];
 //-----------------------------------------------------------
-// CANæ€»çº¿å‰æœŸä¸ºAXI_CANè°ƒè¯•,åæœŸæ”¹ä¸ºAXI_CANFD
+// CAN×ÜÏßÇ°ÆÚÎªAXI_CANµ÷ÊÔ,ºóÆÚ¸ÄÎªAXI_CANFD
 //-----------------------------------------------------------
 
 design_1_wrapper u_ps
@@ -354,11 +354,11 @@ design_1_wrapper u_ps
     .key_int                        (1'b0/* w_keyboard_intr */),//input [0:0] ---- EMIO GPIO
     .In0                            (1'b0/* w_encoder_intr */),//input [0:0] ---- IRQ0
     .In3                            (1'b0/* w_gpib_intr */),//input [0:0] ---- IRQ3
-	//ç”µå­è´Ÿè½½è§¦å‘
+	//µç×Ó¸ºÔØ´¥·¢
     .GPIO_eload_tri_o               (gpio_eload_tri_o   ),//output [1:0] ---- AXI_GPIO //AXI_LITE_6
     .gpio_user_key_tri_i            (4'b0/*gpio_user_key_tri_i*/),//input [3:0] ---- AXI_GPIO //AXI_LITE_7
     .gpio_led_beep_tri_o            (/* gpio_led_beep_tri_o */),//output [1:0] ---- AXI_GPIO //AXI_LITE_8	
-    //ç”µå­è´Ÿè½½
+    //µç×Ó¸ºÔØ
     .M05_AXI_araddr                 (m05_axi_araddr     ),//AXI_LITE_5
     .M05_AXI_arprot                 (m05_axi_arprot     ),//AXI_LITE_5
     .M05_AXI_arready                (m05_axi_arready    ),//AXI_LITE_5
@@ -408,7 +408,7 @@ key_fan_ctrl_wrapper #(
     .S_AXI_RVALID                   (m02_axi_rvalid     ),
     .S_AXI_RREADY                   (m02_axi_rready     ),
 
-	//é£æ‰‡pwmè¾“å‡ºï¼Œæ•…éšœè¾“å…¥ä¿¡å·
+	//·çÉÈpwmÊä³ö£¬¹ÊÕÏÊäÈëĞÅºÅ
     .poc_pwm1_o                     (fan_pwm_o          ),//poc_pwm1
     .poc_pwm2_o                     (                   ),///*poc_pwm2*/
     .pic_pwm1_i                     (fault_pan_i[0]     ),//pic_pwm1		   
@@ -420,7 +420,7 @@ key_fan_ctrl_wrapper #(
     .pic_pwm7_i                     (fault_pan_i[6]     ),//1'b1/*pic_pwm7*/	
     .pic_pwm8_i                     (fault_pan_i[7]     ),//1'b1/*pic_pwm8*/	
 
-	//æŒ‰é”®æ¿é©±åŠ¨ä¿¡å·
+	//°´¼ü°åÇı¶¯ĞÅºÅ
     .spi_ss                         (                   ),//o_spi_ss		   
     .spi_sck                        (                   ),//o_spi_sck		   
     .spi_dout                       (                   ),//o_spi_dout		   
@@ -435,7 +435,7 @@ temperature_wrapper#(
     .C_S_AXI_ADDR_WIDTH             (12                 ) 
 )
 u_temperature_wrapper(
-//ADC ADS131 æ•£çƒ­å™¨æ¸©åº¦é‡‡é›† 
+//ADC ADS131 É¢ÈÈÆ÷ÎÂ¶È²É¼¯ 
     .ch0_temp                       (ch0_temp           ),// input slv_reg000 ch0_temp [32-1:0]
     .ch1_temp                       (ch1_temp           ),// input slv_reg001 ch1_temp [32-1:0]
     .ch2_temp                       (ch2_temp           ),// input slv_reg002 ch2_temp [32-1:0]
@@ -478,9 +478,9 @@ u_temperature_wrapper(
 );
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// ADCé‡‡æ ·
+// ADC²ÉÑù
 //---------------------------------------------------------------------
-// æ¸©åº¦é‡‡æ ·
+// ÎÂ¶È²ÉÑù
 ADS131M08_ctrl u_ADS131M08_ctrl
 (
     .i_clk                          (clk_100m           ),
@@ -505,11 +505,11 @@ ADS131M08_ctrl u_ADS131M08_ctrl
     .i_ic_miso                      (i_ads131_miso      ),
     .o_ic_dir                       (                   ) 
 );
-// ADCç”µå‹é‡‡æ ·
+// ADCµçÑ¹²ÉÑù
 //-----------------------------------------------------------------------
 // ADC
-// AD7606 å…«é€šé“
-// SPIæ¥å£
+// AD7606 °ËÍ¨µÀ
+// SPI½Ó¿Ú
 // ADI
 //-----------------------------------------------------------------------
 AD7606_ctrl u_AD7606_ctrl
@@ -527,11 +527,11 @@ AD7606_ctrl u_AD7606_ctrl
     .i_ic_busy                      (i_ad7606_busy      ),
     .i_ic_miso                      (i_ad7606_d         ) 
 );
-// DACè¾“å‡º
+// DACÊä³ö
  //-----------------------------------------------------------------------
 // DAC
-// AD5689 åŒé€šé“
-// SPIæ¥å£
+// AD5689 Ë«Í¨µÀ
+// SPI½Ó¿Ú
 // ADI
 //-----------------------------------------------------------------------
 AD5689_ctrl u_AD5689_ctrl
@@ -558,7 +558,7 @@ AD5689_ctrl u_AD5689_ctrl
 );
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// ç”µå­è´Ÿè½½æ§åˆ¶é€»è¾‘ä¸»ä½“
+// µç×Ó¸ºÔØ¿ØÖÆÂß¼­Ö÷Ìå
 //---------------------------------------------------------------------
 
 

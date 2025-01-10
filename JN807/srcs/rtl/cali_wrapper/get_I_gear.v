@@ -14,14 +14,14 @@
 
 
 module get_I_gear #(
-    parameter                       I_WATERSHED        = 20_000,//ç”µæµæŒ¡ä½åˆ‡æ¢åˆ†æ°´å²­20A
-    parameter                       I_STANDARD_DEVIATION= 1_000 //æ ‡å‡†å·®1A
+    parameter                       I_WATERSHED        = 20_000,//µçÁ÷µ²Î»ÇĞ»»·ÖË®Áë20A
+    parameter                       I_STANDARD_DEVIATION= 1_000 //±ê×¼²î1A
 ) (
     input  wire                     sys_clk_i           ,//clk100m
     input  wire                     rst_n_i             ,
 
     input  wire                     I_cali_abs_i        ,
-    output reg                      I_gear_H_ON_o        //é«˜ä»£è¡¨é«˜æ¡£
+    output reg                      I_gear_H_ON_o        //¸ß´ú±í¸ßµµ
 );
     localparam                      TIME_1MS           = 100_000;
 
@@ -29,9 +29,9 @@ module get_I_gear #(
 
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
-        I_gear_H_ON_o <= 'd0;                                       //å¼€å§‹ä¸ºä½æ¡£
+        I_gear_H_ON_o <= 'd0;                                       //¿ªÊ¼ÎªµÍµµ
     end
-    else if (gear_switch_cnt == TIME_1MS - 1) begin                 //æ»¡è¶³åˆ‡æŒ¡ä½æ¡ä»¶ï¼Œä¸”æŒç»­1ms
+    else if (gear_switch_cnt == TIME_1MS - 1) begin                 //Âú×ãÇĞµ²Î»Ìõ¼ş£¬ÇÒ³ÖĞø1ms
         I_gear_H_ON_o <= ~I_gear_H_ON_o;
     end
 end

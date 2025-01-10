@@ -23,17 +23,17 @@ module alarm_wrapper #(
 
     input  wire                     Clear_alarm_ON_i    ,//
 //max
-    input  wire        [CALCULATE_WIDTH-1: 0]U_max_i    ,//æœ€å¤§ç”µå‹é™åˆ¶
-    input  wire        [CALCULATE_WIDTH-1: 0]I_max_i    ,//æœ€å¤§ç”µæµé™åˆ¶
-    input  wire        [CALCULATE_WIDTH-1: 0]P_max_i    ,//æœ€å¤§åŠŸç‡é™åˆ¶
+    input  wire        [CALCULATE_WIDTH-1: 0]U_max_i    ,//×î´óµçÑ¹ÏŞÖÆ
+    input  wire        [CALCULATE_WIDTH-1: 0]I_max_i    ,//×î´óµçÁ÷ÏŞÖÆ
+    input  wire        [CALCULATE_WIDTH-1: 0]P_max_i    ,//×î´ó¹¦ÂÊÏŞÖÆ
 //max
-    input  wire        [CALCULATE_WIDTH-1: 0]U_limit_i  ,//ç”µå‹é™åˆ¶
-    input  wire        [CALCULATE_WIDTH-1: 0]I_limit_i  ,//ç”µæµé™åˆ¶
-    input  wire        [CALCULATE_WIDTH-1: 0]P_limit_i  ,//åŠŸç‡é™åˆ¶
-    input  wire        [  15: 0]    Pro_time_i          ,//1-ç«‹å³ä¿æŠ¤ï¼›10-1mSï¼›20-2mSâ€¦â€¦150-15mS
-//å®æ—¶çš„é‡‡æ ·æ•°æ®
-    input  wire signed [CALCULATE_WIDTH-1: 0]U_rt_i     ,//å®æ—¶é‡‡æ ·ç”µå‹
-    input  wire signed [CALCULATE_WIDTH-1: 0]I_rt_i     ,//å®æ—¶é‡‡æ ·ç”µæµ
+    input  wire        [CALCULATE_WIDTH-1: 0]U_limit_i  ,//µçÑ¹ÏŞÖÆ
+    input  wire        [CALCULATE_WIDTH-1: 0]I_limit_i  ,//µçÁ÷ÏŞÖÆ
+    input  wire        [CALCULATE_WIDTH-1: 0]P_limit_i  ,//¹¦ÂÊÏŞÖÆ
+    input  wire        [  15: 0]    Pro_time_i          ,//1-Á¢¼´±£»¤£»10-1mS£»20-2mS¡­¡­150-15mS
+//ÊµÊ±µÄ²ÉÑùÊı¾İ
+    input  wire signed [CALCULATE_WIDTH-1: 0]U_rt_i     ,//ÊµÊ±²ÉÑùµçÑ¹
+    input  wire signed [CALCULATE_WIDTH-1: 0]I_rt_i     ,//ÊµÊ±²ÉÑùµçÁ÷
     input  wire signed [  31: 0]    P_rt_i              ,//mW
 
     input  wire        [CALCULATE_WIDTH-1: 0]threshold_i,
@@ -75,17 +75,17 @@ u_get_ovcp_wrapper(
     .rst_n_i                        (rst_n_i            ),
     .global_1us_flag_i              (global_1us_flag_i  ),
 //max
-    .U_max_i                        (U_max_i            ),// æœ€å¤§ç”µå‹é™åˆ¶
-    .I_max_i                        (I_max_i            ),// æœ€å¤§ç”µæµé™åˆ¶
-    .P_max_i                        (P_max_i            ),// æœ€å¤§åŠŸç‡é™åˆ¶
+    .U_max_i                        (U_max_i            ),// ×î´óµçÑ¹ÏŞÖÆ
+    .I_max_i                        (I_max_i            ),// ×î´óµçÁ÷ÏŞÖÆ
+    .P_max_i                        (P_max_i            ),// ×î´ó¹¦ÂÊÏŞÖÆ
 //max
-    .U_limit_i                      (U_limit_i          ),// ç”µå‹é™åˆ¶
-    .I_limit_i                      (I_limit_i          ),// ç”µæµé™åˆ¶
-    .P_limit_i                      (P_limit_i          ),// åŠŸç‡é™åˆ¶
-    .Pro_time_i                     (Pro_time_i         ),// 1-ç«‹å³ä¿æŠ¤ï¼›10-1mSï¼›20-2mSâ€¦â€¦150-15mS
-//å®æ—¶çš„é‡‡æ ·æ•°æ®
-    .U_rt_i                         (U_rt_i             ),// å®æ—¶é‡‡æ ·ç”µå‹
-    .I_rt_i                         (I_rt_i             ),// å®æ—¶é‡‡æ ·ç”µæµ
+    .U_limit_i                      (U_limit_i          ),// µçÑ¹ÏŞÖÆ
+    .I_limit_i                      (I_limit_i          ),// µçÁ÷ÏŞÖÆ
+    .P_limit_i                      (P_limit_i          ),// ¹¦ÂÊÏŞÖÆ
+    .Pro_time_i                     (Pro_time_i         ),// 1-Á¢¼´±£»¤£»10-1mS£»20-2mS¡­¡­150-15mS
+//ÊµÊ±µÄ²ÉÑùÊı¾İ
+    .U_rt_i                         (U_rt_i             ),// ÊµÊ±²ÉÑùµçÑ¹
+    .I_rt_i                         (I_rt_i             ),// ÊµÊ±²ÉÑùµçÁ÷
     .P_rt_i                         (P_rt_i             ),
     .Clear_alarm_ON_i               (Clear_alarm_ON_i   ),
     .ovp_maxU_alarm_o               (ovp_maxU_alarm_o   ),
