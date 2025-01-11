@@ -57,6 +57,11 @@ module pull_load_wrapper #(
 
     input  wire        [CALCULATE_WIDTH-1: 0]U_abs_i    ,//mV
     input  wire        [CALCULATE_WIDTH-1: 0]I_abs_i    ,//mV
+    //部分硬件管脚控制信号
+    input  wire                     cv_limit_trig_i     ,//1:normal 0:error 硬件CV时电流控制量PROG大于CV_LIMIT
+    output wire                     hardware_lock_off_en_o,
+    output wire                     cc_cv_select_o      ,//1:CELL PROG DA 0:CV HARDWARE LOOP
+    output reg                      cv_limit_select_o   ,//1:CV LIMIT DA 0:CV LIMIT PROG
 
     output reg                      dac_data_valid_o    ,
     output reg         [  15: 0]    dac_data_o          ,
@@ -66,8 +71,10 @@ module pull_load_wrapper #(
 //---------------------------------------------------------------------
 // declarations
 //---------------------------------------------------------------------
+    localparam                      TIME_20MS          = 20_000_00;
     integer                         i                   ;
 
+    wire                            CV_slew             ;//保护后的cv slew
     wire               [AXI_REG_WIDTH-1: 0]SR_slew_i    ;//电流上升斜率单位1mA/ms 需要保护
     wire               [AXI_REG_WIDTH-1: 0]SF_slew_i    ;//电流下降斜率单位1mA/ms 需要保护 
     wire     signed    [AXI_REG_WIDTH+20-1: 0]SR_slew_period  ;//电流上升斜率单位1mA/10ns(every period) slew_i除以100_000
@@ -87,16 +94,38 @@ module pull_load_wrapper #(
     wire                            dac_data_valid      [0:4]  ;
     wire               [  15: 0]    dac_data            [0:4]  ;
     wire               [  15: 0]    dac_data_limit      [0:4]  ;
+
+    reg                [  23: 0]    cv_sw2hw_hold_cnt   ;
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
 // assigns
 //---------------------------------------------------------------------
-    assign                          SR_slew_i          = pull_Rslew_i;
-    assign                          SF_slew_i          = pull_Fslew_i;
+    assign                          SR_slew_i          = (pull_Rslew_i == 0) ? 'd1 : pull_Rslew_i;
+    assign                          SF_slew_i          = (pull_Fslew_i == 0) ? 'd1 : pull_Rslew_i;
+    assign                          CV_slew            = (CV_slew_i == 0) ? 'd1 : CV_slew_i;
+
+    assign                          cc_cv_select_o     = ((Workmod_i == WORKMOD_CV) & CV_mode_hard_ON_i) ? 1'b0 : 1'b1;//1:CELL PROG DA 0:CV HARDWARE LOOP
+    assign                          cv_limit_select_o  = ((Workmod_i == WORKMOD_CV) & CV_mode_hard_ON_i) ? ~cv_limit_trig_i : 1'b1;//1:CV LIMIT DA 0:CV LIMIT PROG
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
 // 分配
 //---------------------------------------------------------------------
+    assign                          hardware_lock_off_en_o= (cv_sw2hw_hold_cnt == TIME_20MS - 1);
+
+always@(posedge sys_clk_i)begin
+    if (!rst_n_i) begin
+        cv_sw2hw_hold_cnt <= 'd0;
+    end
+    else if (CV_mode_hard_ON_i)
+        if (cv_sw2hw_hold_cnt == TIME_20MS - 1)
+            cv_sw2hw_hold_cnt <= cv_sw2hw_hold_cnt;                 //软件切换到硬件CV后20ms，关闭硬件保护使能
+        else
+            cv_sw2hw_hold_cnt <= cv_sw2hw_hold_cnt + 1;
+    else
+        cv_sw2hw_hold_cnt <= 'd0;
+end
+
+
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
         for (i = 0; i<5; i=i+1) begin
@@ -160,7 +189,7 @@ always@(posedge sys_clk_i)begin
                 dac_data_limit_o <= dac_data_limit[2];
             end
             WORKMOD_CV: begin
-                if (CV_mode_hard_ON_i) begin
+                if (CV_mode_hard_ON_i && hardware_lock_off_en_o) begin
                     pull_on          [4] <= pull_on_i          ;
                     pull_precharge_en[4] <= pull_precharge_en_i;
                     pull_target      [4] <= pull_target_i      ;
@@ -227,7 +256,7 @@ div_s48_s24 u_CV_slew_period (
     .s_axis_divisor_tvalid          (1'd1               ),// input wire s_axis_divisor_tvalid
     .s_axis_divisor_tdata           (24'd100_000        ),// input wire [23 : 0] s_axis_divisor_tdata
     .s_axis_dividend_tvalid         (1'd1               ),// input wire s_axis_dividend_tvalid
-    .s_axis_dividend_tdata          ({4'd0,CV_slew_i,20'd0}),// input wire [47 : 0] s_axis_dividend_tdata
+    .s_axis_dividend_tdata          ({4'd0,CV_slew,20'd0}),// input wire [47 : 0] s_axis_dividend_tdata
     .m_axis_dout_tvalid             (                   ),// output wire m_axis_dout_tvalid
     .m_axis_dout_tdata              (CV_slew_period_temp) // output wire [71 : 0] m_axis_dout_tdata
 );
@@ -362,7 +391,7 @@ u_pull_load_software_cv(
     .target_i                       (pull_target      [3]),// 目标值mV
     .initI_i                        (pull_initI       [3]),// 初始电流值mA
     .limitI_i                       (pull_limitI      [3]),// 限制电流mA
-    .CV_slew_i                      (CV_slew_i          ),// CV模式电压变化斜率(1mV/ms)
+    .CV_slew_i                      (CV_slew            ),// CV模式电压变化斜率(1mV/ms)
     .CV_slew_period_i               (CV_slew_period     ),// CV模式电压变化斜率(1mV/ms)
     .SR_slew_i                      (SR_slew_i          ),// 电流上升斜率单位1mA/ms 需要保护
     .SF_slew_i                      (SF_slew_i          ),// 电流下降斜率单位1mA/ms 需要保护
@@ -402,7 +431,7 @@ u_pull_load_hardware_cv(
     .target_i                       (pull_target      [4]),// 目标值mV
     .initI_i                        (pull_initI       [4]),// 初始电流值mA
     .limitI_i                       (pull_limitI      [4]),// 限制电流mA
-    .CV_slew_i                      (CV_slew_i          ),// CV模式电压变化斜率(1mV/ms)
+    .CV_slew_i                      (CV_slew            ),// CV模式电压变化斜率(1mV/ms)
     .CV_slew_period_i               (CV_slew_period     ),// CV模式电压变化斜率(1mV/ms)
     .SR_slew_i                      (SR_slew_i          ),// 电流上升斜率单位1mA/ms 需要保护
     .SF_slew_i                      (SF_slew_i          ),// 电流下降斜率单位1mA/ms 需要保护

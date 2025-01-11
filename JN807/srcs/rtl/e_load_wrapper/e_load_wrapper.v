@@ -30,10 +30,16 @@ module e_load_wrapper #(
     input  wire signed [  15: 0]    AD_Vsense           ,//AD_Vsense----sense端电压
     input  wire signed [  15: 0]    I_SUM_UNIT_AD       ,//I_SUM_UNIT_AD----单板卡24模块汇总电流4.125V
     input  wire signed [  15: 0]    I_BOARD_UNIT_AD     ,//I_BOARD_UNIT_AD----单板卡单模块电流3.4375V
-    // GPIO CTRL
+    // CC/CV环路切换
+    output wire                     vin_select_o        ,//0:Vmod 1:Vsense
+    output wire                     cc_cv_select_o      ,//1:CELL PROG DA 0:CV HARDWARE LOOP
+    output wire                     cv_limit_select_o   ,//1:CV LIMIT DA 0:CV LIMIT PROG
     output wire                     cv_sp_slow_o        ,
     output wire                     cv_sp_mid_o         ,
     output wire                     cv_sp_fast_o        ,
+    //cv limit / ocp board
+    input  wire                     cv_limit_trig_i     ,//1:normal 0:error 硬件CV时电流控制量PROG大于CV_LIMIT
+    input  wire                     ocp_da_trig_i       ,//1:normal 0:error 硬件OCP,暂时没用到
     // DAC signal
     output wire                     dac_ch1_en_o        ,
     output wire        [  15: 0]    dac_ch1_data_o      ,
@@ -51,6 +57,11 @@ module e_load_wrapper #(
 //单元电流值选择
     output wire                     en_sample_o         ,
     output wire        [   2: 0]    sel_sample_o        ,
+//输出保护开关
+    output reg                      hardware_lock_off_o ,//高代表正常(sw短路，硬件不保护)，低代表sw开路硬件保护 hardward lock off
+//正负电源检测（延时检测）
+    input  wire                     vop_negedge_i       ,//1 error . 0 normal .正电压检测
+    input  wire                     vop_posedge_i       ,//1 error . 0 normal .负电压检测
 //V高低档采样切换开关默认高档位
     output wire                     vmod_l_sw_o         ,//Vmod_H/L_SW_FPGA
     output wire                     vsense_l_sw_o       ,//Vsense_H/L_SW_FPGA
@@ -60,6 +71,9 @@ module e_load_wrapper #(
     inout  wire                     io_trig1            ,
     inout  wire                     io_trig2            ,
     output wire                     o_m_s               ,// master_slave flag 1:主机 0:从机
+//并机时cv
+    output wire                     p_sw1               ,//单机，sw1(0),sw2(0)
+    output wire                     p_sw2               ,//主机，sw1(0),sw2(1)，从机，sw1(1),sw2(1)
 	// User ports ends
     input  wire        [C_S_AXI_ADDR_WIDTH-1: 0]S_AXI_AWADDR,
     input  wire        [   2: 0]    S_AXI_AWPROT        ,
@@ -369,6 +383,14 @@ module e_load_wrapper #(
     wire                            sense_error         ;
     wire                            Umod_inv_alarm      ;
     wire                            Usense_inv_alarm    ;
+
+    wire                            VOP_alarm           ;
+(*ASYNC_REG = "true"*)
+    reg                             vop_negedge_r1,vop_negedge_r2  ;//1 error . 0 normal .正电压检测
+(*ASYNC_REG = "true"*)
+    reg                             vop_posedge_r1,vop_posedge_r2  ;//1 error . 0 normal .负电压检测
+
+    wire                            cv_hard_lock_off_en  ;
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
 // assigns
@@ -386,6 +408,7 @@ module e_load_wrapper #(
 
     assign                          vmod_l_sw_o        = ~U_gear_H_ON;
     assign                          vsense_l_sw_o      = ~U_gear_H_ON;
+    assign                          vin_select_o       = SENSE_ON;
 
     assign                          Iset               = {Iset_H[15:0],Iset_L[15:0]};
     assign                          Vset               = {Vset_H[15:0],Vset_L[15:0]};
@@ -419,9 +442,33 @@ module e_load_wrapper #(
     assign                          temperature_7      = ch7_temp_i;
 //报警信息
     assign                          rd_Fault_status    = {
-        5'd0, 1'b0/*TOPP_stop*/, 1'b0/*TOCP_stop*/, 1'b0/*电池*/, sense_error, (Umod_inv_alarm | Usense_inv_alarm),
+        4'd0, VOP_alarm, 1'b0/*TOPP_stop*/, 1'b0/*TOCP_stop*/, 1'b0/*电池*/, sense_error, (Umod_inv_alarm | Usense_inv_alarm),
         mcu_alarm_i, ovp_maxU_alarm, ocp_alarm, ocp_maxI_alarm, opp_alarm, opp_maxP_alarm
     };
+
+    assign                          VOP_alarm          = vop_negedge_r2 || vop_posedge_r2;
+
+// ********************************************************************************** // 
+//---------------------------------------------------------------------
+// simple logic
+//---------------------------------------------------------------------
+// async to sync
+always@(posedge sys_clk_i)begin
+    vop_negedge_r1 <= vop_negedge_i;
+    vop_negedge_r2 <= vop_negedge_r1;
+
+    vop_posedge_r1 <= vop_posedge_i;
+    vop_posedge_r2 <= vop_posedge_r1;
+end
+
+always@(posedge sys_clk_i)begin
+    if (!rst_n_i)
+        hardware_lock_off_o <= 'd0;
+    else if ((rd_Fault_status[7:0] != 'd0) || cv_hard_lock_off_en || VOP_alarm)//出现错误,或者，切换到硬件CV模式20ms后，开启硬件保护
+        hardware_lock_off_o <= 'd0;
+    else
+        hardware_lock_off_o <= 'd1;                                 //正常情况不保护
+end
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
 // cali and calculate absolute value
@@ -638,59 +685,17 @@ get_cv_speed u_get_cv_speed(
     assign                          dac_ch2_en_o       = dac_data_valid;
     assign                          dac_ch2_data_o     = dac_data_limit;
 
-pull_load_wrapper#(
-    .SIMULATION                     (0                  ),
-    .WORKMOD_CC                     (WORKMOD_CC         ),
-    .WORKMOD_CV                     (WORKMOD_CV         ),
-    .WORKMOD_CP                     (WORKMOD_CP         ),
-    .WORKMOD_CR                     (WORKMOD_CR         ),
-    .CALCULATE_WIDTH                (CALCULATE_WIDTH    ),
-    .RF_MAX_LIMIT                   (30_000_000         ),
-    .PRECHARGE_I                    (30                 ),
-    .AXI_REG_WIDTH                  (AXI_REG_WIDTH      ) 
-)
-u_pull_load_wrapper(
-    .sys_clk_i                      (sys_clk_i          ),
-    .rst_n_i                        (rst_n_i            ),
-//software CV
-    .CV_mode_hard_ON_i              (CV_mode_hard_ON    ),
-    .Von_i                          (Von                ),// 开启电压mV
-    .Workmod_i                      (Workmod            ),
-    .global_1us_flag_i              (global_1us_flag    ),
-
-    .pull_on_i                      (pull_on            ),
-    .pull_precharge_en_i            (pull_precharge_en  ),
-    .pull_target_i                  (pull_target        ),
-    .pull_initI_i                   (pull_initI         ),
-    .pull_limitI_i                  (pull_limitI        ),
-    .pull_on_doing_o                (pull_on_doing      ),
-    .pull_Rslew_i                   (pull_Rslew         ),
-    .pull_Fslew_i                   (pull_Fslew         ),
-    .CV_slew_i                      (CV_slew            ),// CV模式电压变化斜率(1mV/ms)
-    .Short_flag_i                   (Short_ON           ),// 短路测试 (STA/DYN)
-    .I_short_i                      (I_short            ),// 短路时拉载电流
-    .CC_k_i                         (CC_k               ),
-    .CC_a_i                         (CC_a               ),
-    .CV_k_i                         (CV_k               ),
-    .CV_a_i                         (CV_a               ),
-    .KP_i                           (KP                 ),
-    .KI_i                           (KI                 ),
-    .KD_i                           ('d0                ),
-    .U_abs_i                        (U_cali_mean_abs    ),// mV
-    .I_abs_i                        (I_cali_mean_abs    ),// mV
-    .dac_data_valid_o               (dac_data_valid     ),
-    .dac_data_o                     (dac_data           ),
-    .dac_data_limit_o               (dac_data_limit     ) 
-);
-
 main_ctrl_pull_load#(
     .SIMULATION                     (SIMULATION         ),
     .CALCULATE_WIDTH                (CALCULATE_WIDTH    ),
     .AXI_REG_WIDTH                  (AXI_REG_WIDTH      ),
+    .PRECHARGE_TIME                 (38                 ),//单位us，38MS预充电时间，仿真设为38加快预充电时间
+
     .WORKMOD_CC                     (WORKMOD_CC         ),
     .WORKMOD_CV                     (WORKMOD_CV         ),
     .WORKMOD_CP                     (WORKMOD_CP         ),
     .WORKMOD_CR                     (WORKMOD_CR         ),
+
     .FUNC_STA                       (FUNC_STA           ),
     .FUNC_DYN                       (FUNC_DYN           ),
     .FUNC_LIST                      (FUNC_LIST          ),
@@ -746,6 +751,57 @@ u_main_ctrl_pull_load(
     .i_BAT_err                      (                   ) // 电池错误 b0:I反向 b1:U反向
 );
 
+pull_load_wrapper#(
+    .SIMULATION                     (0                  ),
+    .WORKMOD_CC                     (WORKMOD_CC         ),
+    .WORKMOD_CV                     (WORKMOD_CV         ),
+    .WORKMOD_CP                     (WORKMOD_CP         ),
+    .WORKMOD_CR                     (WORKMOD_CR         ),
+    .CALCULATE_WIDTH                (CALCULATE_WIDTH    ),
+    .RF_MAX_LIMIT                   (30_000_000         ),
+    .PRECHARGE_I                    (30                 ),//单位mA
+    .AXI_REG_WIDTH                  (AXI_REG_WIDTH      ) 
+)
+u_pull_load_wrapper(
+    .sys_clk_i                      (sys_clk_i          ),
+    .rst_n_i                        (rst_n_i            ),
+//software CV
+    .CV_mode_hard_ON_i              (CV_mode_hard_ON    ),
+    .Von_i                          (Von                ),// 开启电压mV
+    .Workmod_i                      (Workmod            ),
+    .global_1us_flag_i              (global_1us_flag    ),
+
+    .pull_on_i                      (pull_on            ),
+    .pull_precharge_en_i            (pull_precharge_en  ),
+    .pull_target_i                  (pull_target        ),
+    .pull_initI_i                   (pull_initI         ),
+    .pull_limitI_i                  (pull_limitI        ),
+    .pull_on_doing_o                (pull_on_doing      ),
+    .pull_Rslew_i                   (pull_Rslew         ),
+    .pull_Fslew_i                   (pull_Fslew         ),
+    .CV_slew_i                      (CV_slew            ),// CV模式电压变化斜率(1mV/ms)
+    .Short_flag_i                   (Short_ON           ),// 短路测试 (STA/DYN)
+    .I_short_i                      (I_short            ),// 短路时拉载电流
+    .CC_k_i                         (CC_k               ),
+    .CC_a_i                         (CC_a               ),
+    .CV_k_i                         (CV_k               ),
+    .CV_a_i                         (CV_a               ),
+    .KP_i                           (KP                 ),
+    .KI_i                           (KI                 ),
+    .KD_i                           ('d0                ),
+    .U_abs_i                        (U_cali_mean_abs    ),// mV
+    .I_abs_i                        (I_cali_mean_abs    ),// mV
+
+    .cv_limit_trig_i                (cv_limit_trig_i    ),//1:normal 0:error 硬件CV时电流控制量PROG大于CV_LIMIT
+    .hardware_lock_off_en_o         (cv_hard_lock_off_en),
+    .cc_cv_select_o                 (cc_cv_select_o     ),//1:CELL PROG DA 0:CV HARDWARE LOOP
+    .cv_limit_select_o              (cv_limit_select_o  ),//1:CV LIMIT DA 0:CV LIMIT PROG
+
+    .dac_data_valid_o               (dac_data_valid     ),
+    .dac_data_o                     (dac_data           ),
+    .dac_data_limit_o               (dac_data_limit     ) 
+);
+
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
 // detect alarm
@@ -787,9 +843,8 @@ u_alarm_wrapper(
 );
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
-// 
+// 用于显示电压和电流
 //---------------------------------------------------------------------
-
 get_I_unit#(
     .CALCULATE_WIDTH                (CALCULATE_WIDTH    ) 
 )

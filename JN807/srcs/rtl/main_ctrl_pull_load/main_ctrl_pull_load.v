@@ -64,7 +64,7 @@ module main_ctrl_pull_load #(
     input  wire        [  31: 0]    Pro_time_i          ,
     input  wire        [  31: 0]    T1_i                ,
     input  wire        [  31: 0]    T2_i                ,
-    //CC¿≠‘ÿ                             
+    //¿≠‘ÿ                             
     output reg                      pull_on_o           ,
     output reg                      pull_precharge_en_o ,
     output reg         [  31: 0]    pull_target_o       ,
@@ -73,6 +73,12 @@ module main_ctrl_pull_load #(
     output reg         [AXI_REG_WIDTH-1: 0]pull_Rslew_o ,
     output reg         [AXI_REG_WIDTH-1: 0]pull_Fslew_o ,
     input  wire                     pull_on_doing_i     ,
+    //DYN
+    
+    input  wire        [  15: 0]    Dyn_trig_mode_i     ,
+    input  wire        [  15: 0]    Dyn_trig_source_i   ,
+    input  wire        [  15: 0]    Dyn_trig_gen_i      ,
+    //
 
     input  wire        [CALCULATE_WIDTH-1: 0]U_i        ,//mV    
     input  wire        [CALCULATE_WIDTH-1: 0]I_i        ,//mV    
@@ -305,6 +311,10 @@ end
 //---------------------------------------------------------------------
 // ∂ØÃ¨
 //---------------------------------------------------------------------
+    localparam                      CONTINUOUS_TRIG    = 16'h5a5a;
+    localparam                      PULSE_TRIG         = 16'ha5a5;
+    localparam                      FLIP_TRIG          = 16'h5aa5;
+
 always@(posedge sys_clk_i)begin
     if (!rst_n_i) begin
         T1_stage_valid <= 1'd1;
@@ -312,9 +322,9 @@ always@(posedge sys_clk_i)begin
     end
     else case (Func_i)
         FUNC_DYN: begin
-            case (Workmod_i)
-                WORKMOD_CC,WORKMOD_CV,WORKMOD_CP,WORKMOD_CR: begin
-                    if (RUN_flag_ON_i && global_1us_flag_o) begin
+            case (Dyn_trig_mode_i)
+                CONTINUOUS_TRIG: begin
+                    if (RUN_flag_ON_i && global_1us_flag_o && ~first_precharge_en) begin
                         if (T1_stage_valid && (dyn_cnt_us == T1_i - 1)) begin
                             dyn_cnt_us <= 'd0;
                             T1_stage_valid <= 'd0;
@@ -333,9 +343,14 @@ always@(posedge sys_clk_i)begin
                         dyn_cnt_us     <= 1'd0;
                     end
                 end
+                PULSE_TRIG: begin
+                    
+                end
+                FLIP_TRIG: begin
+                    
+                end
                 default: begin
-                    T1_stage_valid <= 1'd1;
-                    dyn_cnt_us     <= 1'd0;
+                    
                 end
             endcase
         end
