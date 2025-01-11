@@ -14,16 +14,16 @@
                                  
 module Main_ctrl_Pull_load #
 (
-parameter  _PRECHARGE_T  = 40  ,//MOS?????(mS)
-parameter  _PRECHARGE_I  = 50  ,//MOS?????(mA)
+parameter  _PRECHARGE_T  = 40  ,//MOS预充电时间(mS)
+parameter  _PRECHARGE_I  = 50  ,//MOS预充电电流(mA)
 parameter  _1US_CKNUM    = 100 
 )
 (
 input                                   i_clk                ,// 
 input                                   i_rst                ,// 
 //common
-input                                   i_on                 ,//??
-input                                   i_off                ,//??
+input                                   i_on                 ,//停止
+input                                   i_off                ,//运行
 output                                  o_doing              ,//
 input                                   i_hardCV_ON          ,//
 //work_mode_function
@@ -41,49 +41,49 @@ input                                   i_func_BAT_P         ,
 input                                   i_func_LIST          ,
 input                                   i_func_TOCP          ,
 input                                   i_func_TOPP          ,
-// input                                   i_flag_Short         ,//???? (STA/DYN)
-// input           [31:0]                  i_I_short            ,//???????
-input                                   i_worktype_Single    ,//??
-input                                   i_ms_Master          ,//??
+// input                                   i_flag_Short         ,//短路测试 (STA/DYN)
+// input           [31:0]                  i_I_short            ,//短路时拉载电流
+input                                   i_worktype_Single    ,//单机
+input                                   i_ms_Master          ,//主机
 //Von
 input                                   i_Von_Latch_ON       ,//Latch ON
 input 									i_Von_Latch_OFF		 ,//Latch OFF
-input           [31:0]                  i_start_Volt         ,//????
-input           [31:0]                  i_stop_Volt          ,//????
+input           [31:0]                  i_start_Volt         ,//启动电压
+input           [31:0]                  i_stop_Volt          ,//停止电压
 //max
-input           [31:0]                  i_maxI_limit         ,//?????????
-input           [31:0]                  i_maxU_limit         ,//?????????
-input           [31:0]                  i_maxP_limit         ,//?????????
+input           [31:0]                  i_maxI_limit         ,//测试件最大电流限制
+input           [31:0]                  i_maxU_limit         ,//测试件最大电压限制
+input           [31:0]                  i_maxP_limit         ,//测试件最大功率限制
 //limit
-input           [31:0]                  i_setI_limit         ,//?????????
-input           [31:0]                  i_setU_limit         ,//?????????
-input           [31:0]                  i_setP_limit         ,//?????????
-input           [31:0]                  i_setI_limit_CV      ,//???CV???????
-input           [15:0]                  i_T_pro              ,//??????
+input           [31:0]                  i_setI_limit         ,//被测件最大电流限制
+input           [31:0]                  i_setU_limit         ,//被测件最大电压限制
+input           [31:0]                  i_setP_limit         ,//被测件最大功率限制
+input           [31:0]                  i_setI_limit_CV      ,//被测件CV时最大电流限制
+input           [15:0]                  i_T_pro              ,//保护时长设置
 //real-time 
-input                                   i_vld_rt             ,//5us????
-input           [31:0]                  i_U_rt               ,//??????
-input           [31:0]                  i_I_rt               ,//??????
-input           [31:0]                  i_P_rt               ,//??????
-input           [31:0]                  i_R_rt               ,//??????
+input                                   i_vld_rt             ,//5us采样更新
+input           [31:0]                  i_U_rt               ,//实时采样电压
+input           [31:0]                  i_I_rt               ,//实时采样电流
+input           [31:0]                  i_P_rt               ,//实时采样功率
+input           [31:0]                  i_R_rt               ,//实时采样电阻
 //STA
-input           [23:0]                  i_slew_CR_STA        ,//reg000B ?????,??????
-input           [23:0]                  i_slew_CF_STA        ,//reg000C ?????,??????
+input           [23:0]                  i_slew_CR_STA        ,//reg000B 静态模式下,电流上升斜率
+input           [23:0]                  i_slew_CF_STA        ,//reg000C 静态模式下,电流下降斜率
 input           [31:0]                  i_Iset_STA           ,//reg0011/reg0012
 input           [31:0]                  i_Uset_STA           ,//reg0013/reg0014
 input           [31:0]                  i_Pset_STA           ,//reg0015/reg0016
 input           [31:0]                  i_Rset_STA           ,//reg0017/reg0018
 //DYN
-input                                   i_trigmode_DYN_C     ,//????
-input                                   i_trigmode_DYN_P     ,//????
-input                                   i_trigmode_DYN_T     ,//????
-input                                   i_trigsource_DYN_N   ,//???(????????)
-input                                   i_trigsource_DYN_M   ,//????
-input                                   i_trigsource_DYN_B   ,//????
-input                                   i_trigsource_DYN_O   ,//????
-input                                   i_triggen_DYN        ,//??(??????)
-input           [23:0]                  i_slew_CR_DYN        ,//reg002D ?????,??????(1mA/us)
-input           [23:0]                  i_slew_CF_DYN        ,//reg002E ?????,??????(1mA/us)
+input                                   i_trigmode_DYN_C     ,//连续触发
+input                                   i_trigmode_DYN_P     ,//脉冲触发
+input                                   i_trigmode_DYN_T     ,//翻转触发
+input                                   i_trigsource_DYN_N   ,//无触发(针对连续触发模式)
+input                                   i_trigsource_DYN_M   ,//手动触发
+input                                   i_trigsource_DYN_B   ,//总线触发
+input                                   i_trigsource_DYN_O   ,//外部触发
+input                                   i_triggen_DYN        ,//触发(针对手动触发)
+input           [23:0]                  i_slew_CR_DYN        ,//reg002D 动态模式下,电流上升斜率(1mA/us)
+input           [23:0]                  i_slew_CF_DYN        ,//reg002E 动态模式下,电流下降斜率(1mA/us)
 input           [31:0]                  i_I1set_DYN          ,//reg0019/reg001A
 input           [31:0]                  i_I2set_DYN          ,//reg001B/reg001C
 input           [31:0]                  i_U1set_DYN          ,//reg001D/reg001E
@@ -101,123 +101,123 @@ input           [31:0]                  i_T2set_CP_DYN       ,//mS//reg008A/reg0
 input           [31:0]                  i_T1set_CR_DYN       ,//mS//reg008C/reg008D
 input           [31:0]                  i_T2set_CR_DYN       ,//mS//reg008E/reg008F
 //BAT
-input                                   i_BT_Stop_U          ,//????
-input                                   i_BT_Stop_T          ,//????
-input                                   i_BT_Stop_C          ,//????
-input           [31:0]                  i_offV_BT_Stop       ,//mV//reg00B3/reg00B4 ??????
-input           [31:0]                  i_offT_BT_Stop       ,//S//reg00B5/reg00B6 ??????
-input           [31:0]                  i_offC_BT_Stop       ,//mAh//reg00B7/reg00B8 ??????
-input           [31:0]                  i_proV_BT_Stop       ,//mV//reg00B9/reg00BA ????????????
-output  reg                             o_cpl_BATT        =0 ,//??????
+input                                   i_BT_Stop_U          ,//电压截止
+input                                   i_BT_Stop_T          ,//时间截止
+input                                   i_BT_Stop_C          ,//容量截止
+input           [31:0]                  i_offV_BT_Stop       ,//mV//reg00B3/reg00B4 放电截止电压
+input           [31:0]                  i_offT_BT_Stop       ,//S//reg00B5/reg00B6 放电截止时间
+input           [31:0]                  i_offC_BT_Stop       ,//mAh//reg00B7/reg00B8 放电截止容量
+input           [31:0]                  i_proV_BT_Stop       ,//mV//reg00B9/reg00BA 电池放电保护测试截止电压
+output  reg                             o_cpl_BATT        =0 ,//电池放电完成
 //TOCP
-input           [31:0]                  i_start_Volt_TOCP    ,//mV//reg00C0/reg00C1 OCP????????
-input           [31:0]                  i_start_Curr_TOCP    ,//mA//reg00C2/reg00C3 OCP????????
-input           [31:0]                  i_stop_Curr_TOCP     ,//mA//reg00C4/reg00C5 OCP????????
-input           [31:0]                  i_step_Curr_TOCP     ,//mA//reg00C6 OCP????????
-input           [31:0]                  i_step_Time_TOCP     ,//S//reg00C7 OCP????????
-input           [31:0]                  i_pro_Volt_TOCP      ,//mV//reg00C8/reg00C9 OCP????????
-input           [31:0]                  i_over_Curr_MIN_TOCP ,//mA//reg00CA/reg00CB OCP?????????
-input           [31:0]                  i_over_Curr_MAX_TOCP ,//mA//reg00CC/reg00CD OCP?????????
+input           [31:0]                  i_start_Volt_TOCP    ,//mV//reg00C0/reg00C1 OCP测试的启动电压值
+input           [31:0]                  i_start_Curr_TOCP    ,//mA//reg00C2/reg00C3 OCP测试的初始电流值
+input           [31:0]                  i_stop_Curr_TOCP     ,//mA//reg00C4/reg00C5 OCP测试的截止电流值
+input           [31:0]                  i_step_Curr_TOCP     ,//mA//reg00C6 OCP测试的步进电流值
+input           [31:0]                  i_step_Time_TOCP     ,//S//reg00C7 OCP测试的步进时间值
+input           [31:0]                  i_pro_Volt_TOCP      ,//mV//reg00C8/reg00C9 OCP测试的保护电压值
+input           [31:0]                  i_over_Curr_MIN_TOCP ,//mA//reg00CA/reg00CB OCP测试的过电流最小值
+input           [31:0]                  i_over_Curr_MAX_TOCP ,//mA//reg00CC/reg00CD OCP测试的过电流最大值
 output  reg                             o_pass_TOCP       =0 ,//
 output  reg                             o_fail_TOCP       =0 ,//
 output  reg     [15:0]                  o_status_TOCP     =0 ,//
 output  reg                             o_cpl_TOCP        =0 ,//
-output  reg     [31:0]                  o_curTarget_TOCP  =0 ,//mA//reg00CE/reg00CF OCP????????(RO)
+output  reg     [31:0]                  o_curTarget_TOCP  =0 ,//mA//reg00CE/reg00CF OCP测试的当前目标值(RO)
 //TOPP
-input           [31:0]                  i_start_Volt_TOPP    ,//mV//reg00D0/reg00D1 OPP????????
-input           [31:0]                  i_start_Power_TOPP   ,//mW//reg00D2/reg00D3 OPP????????
-input           [31:0]                  i_stop_Power_TOPP    ,//mW//reg00D4/reg00D5 OPP????????
-input           [31:0]                  i_step_Power_TOPP    ,//mW//reg00D6 OPP????????
-input           [31:0]                  i_step_Time_TOPP     ,//S//reg00D7 OPP????????
-input           [31:0]                  i_pro_Volt_TOPP      ,//mV//reg00D8/reg00D9 OPP????????
-input           [31:0]                  i_over_Power_MIN_TOPP,//mW//reg00DA/reg00DB OPP?????????
-input           [31:0]                  i_over_Power_MAX_TOPP,//mW//reg00DC/reg00DD OPP?????????
+input           [31:0]                  i_start_Volt_TOPP    ,//mV//reg00D0/reg00D1 OPP测试的启动电压值
+input           [31:0]                  i_start_Power_TOPP   ,//mW//reg00D2/reg00D3 OPP测试的初始功率值
+input           [31:0]                  i_stop_Power_TOPP    ,//mW//reg00D4/reg00D5 OPP测试的截止功率值
+input           [31:0]                  i_step_Power_TOPP    ,//mW//reg00D6 OPP测试的步进功率值
+input           [31:0]                  i_step_Time_TOPP     ,//S//reg00D7 OPP测试的步进时间值
+input           [31:0]                  i_pro_Volt_TOPP      ,//mV//reg00D8/reg00D9 OPP测试的保护电压值
+input           [31:0]                  i_over_Power_MIN_TOPP,//mW//reg00DA/reg00DB OPP测试的过功率最小值
+input           [31:0]                  i_over_Power_MAX_TOPP,//mW//reg00DC/reg00DD OPP测试的过功率最大值
 output  reg                             o_pass_TOPP       =0 ,//
 output  reg                             o_fail_TOPP       =0 ,//
 output  reg     [15:0]                  o_status_TOPP     =0 ,//
 output  reg                             o_cpl_TOPP        =0 ,//
-output  reg     [31:0]                  o_curTarget_TOPP  =0 ,//mW//reg00DE/reg00DF OPP????????(RO)
+output  reg     [31:0]                  o_curTarget_TOPP  =0 ,//mW//reg00DE/reg00DF OPP测试的当前目标值(RO)
 //List
-    input              [  15: 0]    i_total_stepnum_list,//????
-    input              [  15: 0]    i_total_loopnum_list,//?????//0:????
-    input                           i_workmode_CC_list  ,//CC??????
-    input                           i_workmode_CP_list  ,//CP??????
-    input                           i_workmode_CR_list  ,//CR??????
-    input                           i_workmode_CV_list  ,//CV??????
-    input              [  31: 0]    i_target_list       ,//???//mA/mW/ohm/mV
-    input              [  31: 0]    i_runtime_list      ,//??????//uS
-    input              [  15: 0]    i_repeat_list       ,//??????//1-65535
-    input              [  15: 0]    i_goto_list         ,//????????//1-999//??0xFFFF
-    input              [  15: 0]    i_loop_list         ,//?????//1-65535
-    output             [  15: 0]    o_cnt_repeat_list   ,//??????(1-65535)
-    output             [  15: 0]    o_cnt_total_loop_list,//?????(1-1000)
-    output reg         [  15: 0]    o_curstepnum_list =0,//??????//1-1000
-    output             [  15: 0]    o_cnt_loop_list     ,//?????(1-65535)
-    output reg                      o_cpl_list        =0,//list??????
-//DAC??
+    input              [  15: 0]    i_total_stepnum_list,//总的步数
+    input              [  15: 0]    i_total_loopnum_list,//总的循环数//0:无限循环
+    input                           i_workmode_CC_list  ,//CC静态工作模式
+    input                           i_workmode_CP_list  ,//CP静态工作模式
+    input                           i_workmode_CR_list  ,//CR静态工作模式
+    input                           i_workmode_CV_list  ,//CV静态工作模式
+    input              [  31: 0]    i_target_list       ,//拉载值//mA/mW/ohm/mV
+    input              [  31: 0]    i_runtime_list      ,//单步执行时间//uS
+    input              [  15: 0]    i_repeat_list       ,//单步循环次数//1-65535
+    input              [  15: 0]    i_goto_list         ,//小循环跳转目的地//1-999//无效0xFFFF
+    input              [  15: 0]    i_loop_list         ,//小循环次数//1-65535
+    output             [  15: 0]    o_cnt_repeat_list   ,//单步重复计数(1-65535)
+    output             [  15: 0]    o_cnt_total_loop_list,//总循环计数(1-1000)
+    output reg         [  15: 0]    o_curstepnum_list =0,//当前执行编号//1-1000
+    output             [  15: 0]    o_cnt_loop_list     ,//小循环计数(1-65535)
+    output reg                      o_cpl_list        =0,//list列表执行结束
+//DAC控制
 output  reg                             o_outa_enb        =0 ,//
 output  reg     [15:0]                  o_outa_data       =0 ,//CELL_PROG_DA
 output  reg                             o_outb_enb        =0 ,//
 output  reg     [15:0]                  o_outb_data       =0 ,//CV_limit_DA
 //output
-output  reg                             o_workmode_CC_rt  =0 ,//??????
-output  reg                             o_workmode_CP_rt  =0 ,//??????
-output  reg                             o_workmode_CR_rt  =0 ,//??????
-output  reg                             o_workmode_CV_rt  =0 ,//??????
+output  reg                             o_workmode_CC_rt  =0 ,//实时工作模式
+output  reg                             o_workmode_CP_rt  =0 ,//实时工作模式
+output  reg                             o_workmode_CR_rt  =0 ,//实时工作模式
+output  reg                             o_workmode_CV_rt  =0 ,//实时工作模式
 output  reg                             o_flag_1us        =0 ,//I_slew
 output  reg                             o_flag_1ms        =0 ,//
 output  reg                             o_flag_1s         =0 ,//BAT
-output  reg     [23:0]                  o_SR_slew         =0 ,//?????mA/1us
-output  reg     [23:0]                  o_SF_slew         =0 ,//?????mA/1us
-output  reg                             o_enb_slew        =0 ,//?????????????
-output  reg                             o_enb_precharge   =0 ,//??
+output  reg     [23:0]                  o_SR_slew         =0 ,//电流上升沿mA/1us
+output  reg     [23:0]                  o_SF_slew         =0 ,//电流下降沿mA/1us
+output  reg                             o_enb_slew        =0 ,//电流需要上升沿和下降沿使能
+output  reg                             o_enb_precharge   =0 ,//预充
 //
 output  reg     [23:0]                  o_initI_pull         =0 ,//
 input           [23:0]                  i_curI_CC            ,//
 input           [23:0]                  i_curI_CP            ,//
 input           [23:0]                  i_curI_CR            ,//
 input           [23:0]                  i_curI_CV            ,//
-//CC??                                                     
-output  reg                             o_CC_on           =0 ,//??
-output  reg                             o_CC_off          =0 ,//??
-output  reg     [23:0]                  o_CC_target       =0 ,//???mA
+//CC拉载                                                     
+output  reg                             o_CC_on           =0 ,//打开
+output  reg                             o_CC_off          =0 ,//关闭
+output  reg     [23:0]                  o_CC_target       =0 ,//目标值mA
 input                                   i_CC_cpl             ,
 input                                   i_CC_ctrlen          ,//
 input           [15:0]                  i_CC_ctrl            ,//
 input           [15:0]                  i_CC_limit_ctrl      ,//
-//CP??                                                     
-output  reg                             o_CP_on           =0 ,//??
-output  reg                             o_CP_off          =0 ,//??
-output  reg     [31:0]                  o_CP_target       =0 ,//???mA
+//CP拉载                                                     
+output  reg                             o_CP_on           =0 ,//打开
+output  reg                             o_CP_off          =0 ,//关闭
+output  reg     [31:0]                  o_CP_target       =0 ,//目标值mA
 input                                   i_CP_cpl             ,
 input                                   i_CP_ctrlen          ,//
 input           [15:0]                  i_CP_ctrl            ,//
 input           [15:0]                  i_CP_limit_ctrl      ,//
-//CR??                                                     
-output  reg                             o_CR_on           =0 ,//??
-output  reg                             o_CR_off          =0 ,//??
-output  reg     [31:0]                  o_CR_target       =0 ,//???mA
+//CR拉载                                                     
+output  reg                             o_CR_on           =0 ,//打开
+output  reg                             o_CR_off          =0 ,//关闭
+output  reg     [31:0]                  o_CR_target       =0 ,//目标值mA
 input                                   i_CR_cpl             ,
 input                                   i_CR_ctrlen          ,//
 input           [15:0]                  i_CR_ctrl            ,//
 input           [15:0]                  i_CR_limit_ctrl      ,//
-//CV??                                                     
-output  reg                             o_CV_on           =0 ,//??
-output  reg                             o_CV_off          =0 ,//??
-output  reg     [23:0]                  o_CV_target       =0 ,//???mA
+//CV拉载                                                     
+output  reg                             o_CV_on           =0 ,//打开
+output  reg                             o_CV_off          =0 ,//关闭
+output  reg     [23:0]                  o_CV_target       =0 ,//目标值mA
 input                                   i_CV_cpl             ,
 input                                   i_CV_ctrlen          ,//
 input           [15:0]                  i_CV_ctrl            ,//
 input           [15:0]                  i_CV_limit_ctrl      ,//
-//BAT????
-output  reg                             o_BAT_on          =0 ,//??
-output  reg                             o_BAT_off         =0 ,//??
-input           [31:0]                  i_BAT_cap            ,//????mAh  
-input           [31:0]                  i_BAT_time           ,//????S
-input           [23:0]                  i_BAT_U              ,//????mV
-input           [23:0]                  i_BAT_I              ,//????mA
-input           [31:0]                  i_BAT_R              ,//????ohm*10-4
-input           [1:0]                   i_BAT_err             //???? b0:I?? b1:U??
+//BAT电池放电
+output  reg                             o_BAT_on          =0 ,//打开
+output  reg                             o_BAT_off         =0 ,//关闭
+input           [31:0]                  i_BAT_cap            ,//放电容量mAh  
+input           [31:0]                  i_BAT_time           ,//放电时间S
+input           [23:0]                  i_BAT_U              ,//放电电压mV
+input           [23:0]                  i_BAT_I              ,//放电电流mA
+input           [31:0]                  i_BAT_R              ,//放电电阻ohm*10-4
+input           [1:0]                   i_BAT_err             //电池错误 b0:I反向 b1:U反向
 );
 //
 reg                                     s_hardCV_1r      =0  ;//
@@ -243,7 +243,7 @@ assign  w_done_cntus = s_cnt_us >= 1000-1 ? 1'b1 : 1'b0 ;
 assign  w_done_cntms = s_cnt_ms >= 1000-1 ? 1'b1 : 1'b0 ;
 assign  w_done_cnts  = s_cnt_s  >= 60-1   ? 1'b1 : 1'b0 ;
 
-assign  w_funcchange = |(Curfunc ^ Oldfunc) ;//????
+assign  w_funcchange = |(Curfunc ^ Oldfunc) ;//功能变化
 always @ (posedge i_clk)
 begin
     Curfunc <= {i_on,i_off,i_func_FE,i_func_RE,i_func_RIP,i_func_BAT_P,i_func_BAT_N,i_func_TOPP,i_func_TOCP,i_func_LIST,i_func_DYN,i_func_STA};
@@ -293,22 +293,22 @@ reg             [7:0]                   CurWorkMode     =0 ;
 reg             [7:0]                   OldWorkMode     =0 ;
 wire                                    w_modechange       ;
 
-assign  w_modechange = |(CurWorkMode ^ OldWorkMode) ;//??????//????/??/List
+assign  w_modechange = |(CurWorkMode ^ OldWorkMode) ;//工作类型变化//针对静态/动态/List
 always @ (posedge i_clk)
 begin
     CurWorkMode <= {i_trigmode_DYN_T,i_trigmode_DYN_P,i_trigmode_DYN_C,1'b0,i_workmode_CV,i_workmode_CR,i_workmode_CP,i_workmode_CC};
 	OldWorkMode <= CurWorkMode ;
 end
 
-reg                                     s_pullout_enb     =0 ;//????
+reg                                     s_pullout_enb     =0 ;//拉载使能
 reg                                     s_pullout_enb_add =0 ;//
 reg             [15:0]                  s_cnt_pullout_add =0 ;//
 wire                                    w_done_pullout_add   ;//
 													      
-reg             [31:0]                  s_cnt_protime_i   =0 ;//????
-reg             [31:0]                  s_cnt_protime_v   =0 ;//????
-reg             [31:0]                  s_cnt_protime_p   =0 ;//????
-reg             [31:0]                  s_cknum_prot      =0 ;//??????????
+reg             [31:0]                  s_cnt_protime_i   =0 ;//时钟计数
+reg             [31:0]                  s_cnt_protime_v   =0 ;//时钟计数
+reg             [31:0]                  s_cnt_protime_p   =0 ;//时钟计数
+reg             [31:0]                  s_cknum_prot      =0 ;//保护时间换算成时钟数
 wire                                    w_done_cntprotime_i  ;
 wire                                    w_done_cntprotime_v  ;
 wire                                    w_done_cntprotime_p  ;
@@ -325,10 +325,10 @@ wire                                    w_done_cntt1us       ;
 wire                                    w_done_cntt2us       ;
 reg                                     s_T1_stage        =1 ;
 //list                                                             
-reg             [15:0]                  s_cnt_total_loop_list  =1 ;//?????(1-1000)
-reg             [31:0]                  s_cnt_runtime_list     =1 ;//????????(1clk=10ns)
-reg             [15:0]                  s_cnt_repeat_list      =1 ;//??????(1-65535)
-reg             [15:0]                  s_cnt_loop_list        =1 ;//?????(1-65535)
+reg             [15:0]                  s_cnt_total_loop_list  =1 ;//总循环计数(1-1000)
+reg             [31:0]                  s_cnt_runtime_list     =1 ;//单步运行时间计数(1clk=10ns)
+reg             [15:0]                  s_cnt_repeat_list      =1 ;//单步重复计数(1-65535)
+reg             [15:0]                  s_cnt_loop_list        =1 ;//小循环计数(1-65535)
 wire                                    w_done_total_loop_list    ;
 wire                                    w_done_runus_list         ;
 wire                                    w_done_repeat_list        ;
@@ -342,12 +342,12 @@ reg                                     s_latch_workmode_CC_list   =0 ;
 reg                                     s_latch_workmode_CP_list   =0 ;
 reg                                     s_latch_workmode_CR_list   =0 ;
 reg                                     s_latch_workmode_CV_list   =0 ;
-reg             [31:0]                  s_latch_target_list        =0 ;//???
-reg             [31:0]                  s_latch_runtime_list       =0 ;//uS//??????
-wire            [31:0]                  w_latch_runtime_list          ;//10nS//??????
-reg             [15:0]                  s_latch_repeat_list        =0 ;//??????,1-65535
-reg             [15:0]                  s_latch_goto_list          =0 ;//????????,1-999,??0xFFFF
-reg             [15:0]                  s_latch_loop_list          =0 ;//?????,1-65535
+reg             [31:0]                  s_latch_target_list        =0 ;//拉载值
+reg             [31:0]                  s_latch_runtime_list       =0 ;//uS//单步执行时间
+wire            [31:0]                  w_latch_runtime_list          ;//10nS//单步执行时间
+reg             [15:0]                  s_latch_repeat_list        =0 ;//单步循环次数,1-65535
+reg             [15:0]                  s_latch_goto_list          =0 ;//小循环跳转目的地,1-999,无效0xFFFF
+reg             [15:0]                  s_latch_loop_list          =0 ;//小循环次数,1-65535
 															 
 reg             [7 : 0]                 s_cnt_ns_TOCPP       =0 ;
 reg             [9 : 0]                 s_cnt_us_TOCPP       =0 ;
@@ -363,13 +363,13 @@ reg             [31:0]                  s_cnt_steptime_TOPP  =0 ;
 wire                                    w_done_steptime_TOPP    ;
 reg                                     s_init_TOPP          =1 ;
 
-reg                                     s_init_CC  =1 ;//CC??????
-reg                                     s_init_CP  =1 ;//CP??????
-reg                                     s_init_CR  =1 ;//CR??????
-reg                                     s_init_CV  =1 ;//CV??????
+reg                                     s_init_CC  =1 ;//CC拉载初始状态
+reg                                     s_init_CP  =1 ;//CP拉载初始状态
+reg                                     s_init_CR  =1 ;//CR拉载初始状态
+reg                                     s_init_CV  =1 ;//CV拉载初始状态
 
-reg                                     s_von_enb_pull   =0 ;//?????
-reg             [9 : 0]                 s_cntmsprecharge =0 ;//??????
+reg                                     s_von_enb_pull   =0 ;//第一次拉载
+reg             [9 : 0]                 s_cntmsprecharge =0 ;//预充时间计时
 wire                                    w_done_precharge    ;//
 //
 //b0:i_workmode_CC_list b1:i_workmode_CP_list b2:i_workmode_CR_list b3:i_workmode_CV_list
@@ -396,7 +396,7 @@ begin
 	OldWorkMode_bat <= CurWorkMode_bat ;
 end
 
-//5us????
+//5us采样更新
 wire                                    w_setI_over     ;//
 wire                                    w_setU_over     ;//
 wire                                    w_setP_over     ;//
@@ -522,7 +522,7 @@ begin
 										if (s_init_CC == 1)
 										    begin /* o_enb_slew <= 1 ;  o_enb_precharge <= 1 ; */end
 										else if (s_von_enb_pull == 1) begin
-											// if (s_cnt_us == 299)//????
+											// if (s_cnt_us == 299)//用于仿真
 											if (i_U_rt >= i_start_Volt)
 										        begin o_enb_precharge <= 0 ;  end
 											// else if (i_U_rt < i_stop_Volt)
@@ -691,7 +691,7 @@ begin
 										if (s_init_CC == 1)
 										    begin /* o_enb_precharge <= 1 ; */ end
 										else if (s_von_enb_pull == 1) begin
-											// if (s_cnt_us == 299)//????
+											// if (s_cnt_us == 299)//用于仿真
 											if (i_U_rt >= i_start_Volt)
 										        begin o_enb_precharge <= 0 ;  end
 											// else if (i_U_rt < i_stop_Volt)
@@ -830,8 +830,8 @@ begin
 			                    o_SR_slew   <= i_slew_CR_STA ;
 								o_SF_slew   <= i_slew_CF_STA ;
 								
-								if ((w_modechange_list == 1'b1) || (o_cpl_list == 1)) //????????
-								// if (o_cpl_list == 1) //????????
+								if ((w_modechange_list == 1'b1) || (o_cpl_list == 1)) //列表执行完不拉载
+								// if (o_cpl_list == 1) //列表执行完不拉载
 								    begin
 									    o_CC_on  <= 0 ; o_CP_on  <= 0 ; o_CR_on  <= 0 ; o_CV_on  <= 0 ;
                                         o_CC_off <= 1 ; o_CP_off <= 1 ; o_CR_off <= 1 ; o_CV_off <= 1 ;
@@ -1009,14 +1009,14 @@ begin
 								    begin o_CC_on <= 1 ; o_CC_off <= 0 ; end
 								// else if (i_U_rt >= i_start_Volt_TOCP)
 								    // begin o_CC_on <= 1 ; o_CC_off <= 0 ; end
-								else if ((i_U_rt < i_pro_Volt_TOCP)) // ??ocp????
+								else if ((i_U_rt < i_pro_Volt_TOCP)) // 触发ocp立刻停止
 									begin o_CC_on <= 0 ; o_CC_off <= 1 ; end
 								else
 								    begin o_CC_on <= o_CC_on ; o_CC_off <= o_CC_off ; end								
 								
 								if (s_init_TOCP == 1)
 								    o_CC_target <= i_start_Curr_TOCP ;
-								else if ((i_U_rt < i_pro_Volt_TOCP))// ??ocp?????
+								else if ((i_U_rt < i_pro_Volt_TOCP))// 触发ocp保留当前值
 								    o_CC_target <= o_CC_target ;
 								else if ((w_done_steptime_TOCP == 1) && ((o_CC_target + i_step_Curr_TOCP) < i_stop_Curr_TOCP))
 								    o_CC_target <= o_CC_target + i_step_Curr_TOCP ;
@@ -1042,14 +1042,14 @@ begin
 								    begin o_CP_on <= 1 ; o_CP_off <= 0 ; end
 								// else if (i_U_rt >= i_start_Volt_TOPP)
 								    // begin o_CP_on <= 1 ; o_CP_off <= 0 ; end
-								else if((i_U_rt < i_pro_Volt_TOPP))// opp????
+								else if((i_U_rt < i_pro_Volt_TOPP))// opp立刻停止
 									begin o_CP_on <= 0 ; o_CP_off <= 1 ; end
 								else
 								    begin o_CP_on <= o_CP_on ; o_CP_off <= o_CP_off ; end								
 	        													
 								if (s_init_TOPP == 1)
 								    o_CP_target <= i_start_Power_TOPP ;
-								else if ((i_U_rt < i_pro_Volt_TOPP))// opp????
+								else if ((i_U_rt < i_pro_Volt_TOPP))// opp立刻停止
 									o_CP_target <= o_CP_target ;
 								else if ((w_done_steptime_TOPP == 1) && ((o_CP_target + i_step_Power_TOPP) < i_stop_Power_TOPP))
 								    o_CP_target <= o_CP_target + i_step_Power_TOPP ;
@@ -1086,13 +1086,13 @@ begin
  
 										if (s_init_CC == 1)
 										    begin o_CC_on <= 1 ; o_BAT_on  <= 0 ; o_CC_off <= 0 ; o_BAT_off  <= 1 ; end
-										else if (i_U_rt < i_proV_BT_Stop) //??????
+										else if (i_U_rt < i_proV_BT_Stop) //电压保护截止
 	        							    begin o_CC_on <= 0 ; o_BAT_on  <= 0 ; o_CC_off <= 1 ; o_BAT_off  <= 1 ; end
-										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //????
+										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //电压截止
 										    begin o_CC_on <= 0 ; o_BAT_on  <= 0 ; o_CC_off <= 1 ; o_BAT_off  <= 1 ; end
-										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //????
+										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //时间截止
 										    begin o_CC_on <= 0 ; o_BAT_on  <= 0 ; o_CC_off <= 1 ; o_BAT_off  <= 1 ; end
-										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //????
+										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //容量截止
 										    begin o_CC_on <= 0 ; o_BAT_on  <= 0 ; o_CC_off <= 1 ; o_BAT_off  <= 1 ; end
 										else
 										    begin o_CC_on <= 1 ; o_BAT_on  <= 1 ; o_CC_off <= 0 ; o_BAT_off  <= 0 ;end
@@ -1112,13 +1112,13 @@ begin
 										
 										if (s_init_CP == 1)
 										    begin o_CP_on <= 1 ; o_BAT_on  <= 0 ; o_CP_off <= 0 ; o_BAT_off  <= 1 ; end
-										else if (i_U_rt < i_proV_BT_Stop) //??????
+										else if (i_U_rt < i_proV_BT_Stop) //电压保护截止
 	        							    begin o_CP_on <= 0 ; o_BAT_on  <= 0 ; o_CP_off <= 1 ; o_BAT_off  <= 1 ; end
-										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //????
+										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //电压截止
 										    begin o_CP_on <= 0 ; o_BAT_on  <= 0 ; o_CP_off <= 1 ; o_BAT_off  <= 1 ; end
-										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //????
+										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //时间截止
 										    begin o_CP_on <= 0 ; o_BAT_on  <= 0 ; o_CP_off <= 1 ; o_BAT_off  <= 1 ; end
-										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //????
+										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //容量截止
 										    begin o_CP_on <= 0 ; o_BAT_on  <= 0 ; o_CP_off <= 1 ; o_BAT_off  <= 1 ; end
 										else
 										    begin o_CP_on <= 1 ; o_BAT_on  <= 1 ; o_CP_off <= 0 ; o_BAT_off  <= 0 ; end
@@ -1138,13 +1138,13 @@ begin
 										
 										if (s_init_CR == 1)
 										    begin o_CR_on <= 1 ; o_BAT_on  <= 0 ; o_CR_off <= 0 ; o_BAT_off  <= 1 ; end
-										else if (i_U_rt < i_proV_BT_Stop) //??????
+										else if (i_U_rt < i_proV_BT_Stop) //电压保护截止
 	        							    begin o_CR_on <= 0 ; o_BAT_on  <= 0 ; o_CR_off <= 1 ; o_BAT_off  <= 1 ; end
-										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //????
+										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //电压截止
 										    begin o_CR_on <= 0 ; o_BAT_on  <= 0 ; o_CR_off <= 1 ; o_BAT_off  <= 1 ; end
-										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //????
+										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //时间截止
 										    begin o_CR_on <= 0 ; o_BAT_on  <= 0 ; o_CR_off <= 1 ; o_BAT_off  <= 1 ; end
-										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //????
+										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //容量截止
 										    begin o_CR_on <= 0 ; o_BAT_on  <= 0 ; o_CR_off <= 1 ; o_BAT_off  <= 1 ; end
 										else
 										    begin o_CR_on <= 1 ; o_BAT_on  <= 1 ; o_CR_off <= 0 ; o_BAT_off  <= 0 ; end
@@ -1178,7 +1178,7 @@ assign  w_done_us_DYN = s_cnt_us_DYN >= 1000-1 ? 1'B1 : 1'B0 ;
 
 assign  w_done_precharge = s_cntmsprecharge >= _PRECHARGE_T ? 1'b1 : 1'b0 ;
 //----------------------------------------------------------------------------
-//?????????????
+//将保护时长设置数转为时钟数
 // s_cknum_prot = i_T_pro * 10000 
 //----------------------------------------------------------------------------
 always @ (posedge i_clk)
@@ -1219,13 +1219,13 @@ begin
 										else
 										    s_init_CC <= s_init_CC ;
 										
-										// if ((w_done_cntns == 1'b1) && (s_cntmsprecharge < _PRECHARGE_T))//????
+										// if ((w_done_cntns == 1'b1) && (s_cntmsprecharge < _PRECHARGE_T))//用于仿真
 										if ((w_done_cntns == 1'b1) && (w_done_cntus == 1'b1) && (s_cntmsprecharge < _PRECHARGE_T))
 										    s_cntmsprecharge <= s_cntmsprecharge + 'h1 ;
 										else
 										    s_cntmsprecharge <= s_cntmsprecharge ;
 										
-										// if ((s_init_CC == 1) && (w_done_precharge == 1'b1))//????
+										// if ((s_init_CC == 1) && (w_done_precharge == 1'b1))//用于仿真
 										if (i_Von_Latch_ON) begin
 											if ((s_init_CC == 1) && (i_U_rt >= i_start_Volt) && (w_done_precharge == 1'b1)) begin
 												s_von_enb_pull <= 1 ;
@@ -1433,13 +1433,13 @@ begin
 										else
 										    s_init_CC <= s_init_CC ;
 										
-										// if ((w_done_cntns == 1'b1) && (s_cntmsprecharge < _PRECHARGE_T))// ????
+										// if ((w_done_cntns == 1'b1) && (s_cntmsprecharge < _PRECHARGE_T))// 用于仿真
 										if ((w_done_cntns == 1'b1) && (w_done_cntus == 1'b1) && (s_cntmsprecharge < _PRECHARGE_T))
 										    s_cntmsprecharge <= s_cntmsprecharge + 'h1 ;
 										else
 										    s_cntmsprecharge <= s_cntmsprecharge ;
 										
-										// if ((s_init_CC == 1) && (w_done_precharge == 1'b1))//????
+										// if ((s_init_CC == 1) && (w_done_precharge == 1'b1))//用于仿真
 										if (i_Von_Latch_ON) begin
 											if ((s_init_CC == 1) && (i_U_rt >= i_start_Volt) && (w_done_precharge == 1'b1)) begin
 												s_von_enb_pull <= 1 ;
@@ -1477,11 +1477,11 @@ begin
 										// else
 										//     s_von_enb_pull <= s_von_enb_pull ;
 											
-										if (CurWorkMode[6] == 1'b1) //????/* i_trigmode_DYN_P */
+										if (CurWorkMode[6] == 1'b1) //脉冲触发/* i_trigmode_DYN_P */
 										    begin
 											    if (s_init_CC == 1)
 												    s_T1_stage <= 1 ;
-												else if ((s_T1_stage == 1) && (i_triggen_DYN == 1'b1)) //????
+												else if ((s_T1_stage == 1) && (i_triggen_DYN == 1'b1)) //触发一次
 												    s_T1_stage <= 0 ;
 												else if ((s_T1_stage == 0) && (w_done_cntt2us == 1'b1))
 												    s_T1_stage <= 1 ;
@@ -1520,13 +1520,13 @@ begin
                                                	        	s_cnt_us_DYN <= s_cnt_us_DYN ;				
 													end
 											end
-										else if (CurWorkMode[7] == 1'b1) //????/* i_trigmode_DYN_T */
+										else if (CurWorkMode[7] == 1'b1) //翻转触发/* i_trigmode_DYN_T */
 										    begin
 											    if (s_init_CC == 1)
 												    s_T1_stage <= 1 ;
-												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 1)) //????
+												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 1)) //触发一次
 												    s_T1_stage <= 0 ;
-												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 0)) //????
+												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 0)) //触发一次
 												    s_T1_stage <= 1 ;
 												else 
 												    s_T1_stage <= s_T1_stage ;
@@ -1536,7 +1536,7 @@ begin
                                                 s_cnt_ns_DYN <= 'h0 ;
                                                 s_cnt_us_DYN <= 'h0 ;
 											end
-										else //????
+										else //连续触发
 										    begin
 											    if (s_init_CC == 1)
 												    s_T1_stage <= 1 ;
@@ -1554,7 +1554,7 @@ begin
 													end
 												else if (s_T1_stage == 1)  //
 												    begin 
-													    if ((w_done_cntt2us == 0) && (w_done_ns_DYN == 1'b1))//????us
+													    if ((w_done_cntt2us == 0) && (w_done_ns_DYN == 1'b1))//单位改成us
 												            s_cnt_t1us <= s_cnt_t1us + 'h1 ;
 														else
 														    s_cnt_t1us <= s_cnt_t1us ;
@@ -1565,7 +1565,7 @@ begin
 												    begin
 													    s_cnt_t1us <= 'h0 ;
 														
-														if ((w_done_cntt2us == 0) && (w_done_ns_DYN == 1'b1))//????us
+														if ((w_done_cntt2us == 0) && (w_done_ns_DYN == 1'b1))//单位改成us
 												            s_cnt_t2us <= s_cnt_t2us + 'h1 ;
 														else
 														    s_cnt_t2us <= s_cnt_t2us ;
@@ -1663,11 +1663,11 @@ begin
 										// else
 										//     s_von_enb_pull <= s_von_enb_pull ;
 											
-										if (CurWorkMode[6] == 1'b1) //????/* i_trigmode_DYN_P */
+										if (CurWorkMode[6] == 1'b1) //脉冲触发/* i_trigmode_DYN_P */
 										    begin
 											    if (s_init_CP == 1)
 												    s_T1_stage <= 1 ;
-												else if ((s_T1_stage == 1) && (i_triggen_DYN == 1'b1)) //????
+												else if ((s_T1_stage == 1) && (i_triggen_DYN == 1'b1)) //触发一次
 												    s_T1_stage <= 0 ;
 												else if ((s_T1_stage == 0) && (w_done_cntt2us == 1'b1))
 												    s_T1_stage <= 1 ;
@@ -1706,13 +1706,13 @@ begin
                                                	        	s_cnt_us_DYN <= s_cnt_us_DYN ;				
 													end
 											end
-										else if (CurWorkMode[7] == 1'b1) //????/* i_trigmode_DYN_T */
+										else if (CurWorkMode[7] == 1'b1) //翻转触发/* i_trigmode_DYN_T */
 										    begin
 											    if (s_init_CP == 1)
 												    s_T1_stage <= 1 ;
-												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 1)) //????
+												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 1)) //触发一次
 												    s_T1_stage <= 0 ;
-												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 0)) //????
+												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 0)) //触发一次
 												    s_T1_stage <= 1 ;
 												else 
 												    s_T1_stage <= s_T1_stage ;
@@ -1722,7 +1722,7 @@ begin
                                                 s_cnt_ns_DYN <= 'h0 ;
                                                 s_cnt_us_DYN <= 'h0 ;
 											end
-										else //????
+										else //连续触发
 										    begin
 											    if (s_init_CP == 1)
 												    s_T1_stage <= 1 ;
@@ -1849,11 +1849,11 @@ begin
 										// else
 										//     s_von_enb_pull <= s_von_enb_pull ;
 																				
-										if (CurWorkMode[6] == 1'b1) //????/* i_trigmode_DYN_P */
+										if (CurWorkMode[6] == 1'b1) //脉冲触发/* i_trigmode_DYN_P */
 										    begin
 											    if (s_init_CR == 1)
 												    s_T1_stage <= 1 ;
-												else if ((s_T1_stage == 1) && (i_triggen_DYN == 1'b1)) //????
+												else if ((s_T1_stage == 1) && (i_triggen_DYN == 1'b1)) //触发一次
 												    s_T1_stage <= 0 ;
 												else if ((s_T1_stage == 0) && (w_done_cntt2us == 1'b1))
 												    s_T1_stage <= 1 ;
@@ -1892,13 +1892,13 @@ begin
                                                	        	s_cnt_us_DYN <= s_cnt_us_DYN ;				
 													end
 											end
-										else if (CurWorkMode[7] == 1'b1) //????/* i_trigmode_DYN_T */
+										else if (CurWorkMode[7] == 1'b1) //翻转触发/* i_trigmode_DYN_T */
 										    begin
 											    if (s_init_CR == 1)
 												    s_T1_stage <= 1 ;
-												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 1)) //????
+												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 1)) //触发一次
 												    s_T1_stage <= 0 ;
-												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 0)) //????
+												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 0)) //触发一次
 												    s_T1_stage <= 1 ;
 												else 
 												    s_T1_stage <= s_T1_stage ;
@@ -1908,7 +1908,7 @@ begin
                                                 s_cnt_ns_DYN <= 'h0 ;
                                                 s_cnt_us_DYN <= 'h0 ;
 											end
-										else //????
+										else //连续触发
 										    begin
 											    if (s_init_CR == 1)
 												    s_T1_stage <= 1 ;
@@ -2035,11 +2035,11 @@ begin
 										// else
 										//     s_von_enb_pull <= s_von_enb_pull ;
 
-	        							if (CurWorkMode[6] == 1'b1) //????/* i_trigmode_DYN_P */
+	        							if (CurWorkMode[6] == 1'b1) //脉冲触发/* i_trigmode_DYN_P */
 										    begin
 											    if (s_init_CV == 1)
 												    s_T1_stage <= 1 ;
-												else if ((s_T1_stage == 1) && (i_triggen_DYN == 1'b1)) //????
+												else if ((s_T1_stage == 1) && (i_triggen_DYN == 1'b1)) //触发一次
 												    s_T1_stage <= 0 ;
 												else if ((s_T1_stage == 0) && (w_done_cntt2us == 1'b1))
 												    s_T1_stage <= 1 ;
@@ -2078,13 +2078,13 @@ begin
                                                	        	s_cnt_us_DYN <= s_cnt_us_DYN ;				
 													end
 											end
-										else if (CurWorkMode[7] == 1'b1) //????/* i_trigmode_DYN_T */
+										else if (CurWorkMode[7] == 1'b1) //翻转触发/* i_trigmode_DYN_T */
 										    begin
 											    if (s_init_CV == 1)
 												    s_T1_stage <= 1 ;
-												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 1)) //????
+												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 1)) //触发一次
 												    s_T1_stage <= 0 ;
-												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 0)) //????
+												else if ((i_triggen_DYN == 1'b1) && (s_T1_stage == 0)) //触发一次
 												    s_T1_stage <= 1 ;
 												else 
 												    s_T1_stage <= s_T1_stage ;
@@ -2094,7 +2094,7 @@ begin
                                                 s_cnt_ns_DYN <= 'h0 ;
                                                 s_cnt_us_DYN <= 'h0 ;
 											end
-										else //????
+										else //连续触发
 										    begin
 											    if (s_init_CV == 1)
 												    s_T1_stage <= 1 ;
@@ -2434,7 +2434,7 @@ begin
 										else
 										    s_init_CC <= s_init_CC ;
 										
-								        if ((w_done_cntns == 1'b1) && (w_done_cntus == 1'b1) && (s_cntmsprecharge < _PRECHARGE_T))//  ????cntus
+								        if ((w_done_cntns == 1'b1) && (w_done_cntus == 1'b1) && (s_cntmsprecharge < _PRECHARGE_T))//  仿真改为cntus
 								            s_cntmsprecharge <= s_cntmsprecharge + 'h1 ;
 								        else
 								            s_cntmsprecharge <= s_cntmsprecharge ;
@@ -2511,21 +2511,21 @@ assign  o_cnt_total_loop_list = s_cnt_total_loop_list;
 assign  o_cnt_loop_list = s_cnt_loop_list;
 
 //runtime * 100
-//??????????
+//将运行时间转为时钟数
 assign  w_latch_runtime_list = {s_latch_runtime_list,6'b0} + {s_latch_runtime_list,5'b0} + {s_latch_runtime_list,2'b0} ;
 
 always @ (posedge i_clk)
 begin    
-	s_rdbuff_enb_1dly <= s_rdbuff_enb ;//buff?????
+	s_rdbuff_enb_1dly <= s_rdbuff_enb ;//buff读数据对齐
 	
 	if ((s_pullout_enb == 1'b0) || (w_funcchange == 1'b1))
 	    begin
-		    o_curstepnum_list     <= 'h1  ;//buff???1??
-			s_rdbuff_enb          <= 1'b1 ;//buff???
-            s_cnt_total_loop_list <= 'd1  ;//???1??
-            s_cnt_runtime_list    <= 'd1  ;//???1??
-            s_cnt_repeat_list     <= 'd1  ;//???1??
-            s_cnt_loop_list       <= 'd1  ;//???1??
+		    o_curstepnum_list     <= 'h1  ;//buff地址从1开始
+			s_rdbuff_enb          <= 1'b1 ;//buff读使能
+            s_cnt_total_loop_list <= 'd1  ;//计数从1开始
+            s_cnt_runtime_list    <= 'd1  ;//计数从1开始
+            s_cnt_repeat_list     <= 'd1  ;//计数从1开始
+            s_cnt_loop_list       <= 'd1  ;//计数从1开始
 			o_cpl_list            <= 0    ;
 	    end	
 	else
@@ -2565,188 +2565,188 @@ begin
 										s_latch_loop_list          <= s_latch_loop_list          ;
 									end
 								
-								if (o_cpl_list == 1) //??????
+								if (o_cpl_list == 1) //列表执行完成
 								    begin
-									    s_cnt_total_loop_list <= 'd1  ;//??????????
-										s_cnt_runtime_list    <= 'd1  ;//?????????????
-										s_cnt_repeat_list     <= 'd1  ;//???????????
-										s_cnt_loop_list       <= 'd1  ;//??????????
-										o_curstepnum_list     <= 'h1  ;//buff???????
-										s_rdbuff_enb          <= 1'b0 ;//buff????????
+									    s_cnt_total_loop_list <= 'd1  ;//总循环计数回到初始值
+										s_cnt_runtime_list    <= 'd1  ;//单步执行时间计数回到初始值
+										s_cnt_repeat_list     <= 'd1  ;//单步循环计数回到初始值
+										s_cnt_loop_list       <= 'd1  ;//小循环计数回到初始值
+										o_curstepnum_list     <= 'h1  ;//buff地址回到初始值
+										s_rdbuff_enb          <= 1'b0 ;//buff读使能回到初始值
 								    end
-								else if ((o_curstepnum_list >= s_latch_total_stepnum_list) && (w_done_total_loop_list == 1)) //??????step//?????
+								else if ((o_curstepnum_list >= s_latch_total_stepnum_list) && (w_done_total_loop_list == 1)) //列表最后一个step//总循环结束
 								    begin
-								        if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (s_latch_goto_list == 'hffff)) //??????//??????//????
+								        if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (s_latch_goto_list == 'hffff)) //单步循环结束//单步执行结束//无小循环
 								            begin
-											    s_cnt_total_loop_list <= 'd1  ;//??????????
-												s_cnt_runtime_list    <= 'd1  ;//?????????????
-												s_cnt_repeat_list     <= 'd1  ;//???????????
-												s_cnt_loop_list       <= 'd1  ;//??????????
-												o_curstepnum_list     <= 'h1  ;//buff???????
-											    s_rdbuff_enb          <= 1'b0 ;//buff????????
+											    s_cnt_total_loop_list <= 'd1  ;//总循环计数回到初始值
+												s_cnt_runtime_list    <= 'd1  ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= 'd1  ;//单步循环计数回到初始值
+												s_cnt_loop_list       <= 'd1  ;//小循环计数回到初始值
+												o_curstepnum_list     <= 'h1  ;//buff地址回到初始值
+											    s_rdbuff_enb          <= 1'b0 ;//buff读使能回到初始值
 											end
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b1)) //??????//??????//?????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b1)) //单步循环结束//单步执行结束//小循环结束
 								            begin
-											    s_cnt_total_loop_list <= 'd1  ;//??????????
-												s_cnt_runtime_list    <= 'd1  ;//?????????????
-												s_cnt_repeat_list     <= 'd1  ;//???????????
-												s_cnt_loop_list       <= 'd1  ;//??????????												
-												o_curstepnum_list     <= 'h1  ;//buff???????
-											    s_rdbuff_enb          <= 1'b0 ;//buff????????
+											    s_cnt_total_loop_list <= 'd1  ;//总循环计数回到初始值
+												s_cnt_runtime_list    <= 'd1  ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= 'd1  ;//单步循环计数回到初始值
+												s_cnt_loop_list       <= 'd1  ;//小循环计数回到初始值												
+												o_curstepnum_list     <= 'h1  ;//buff地址回到初始值
+											    s_rdbuff_enb          <= 1'b0 ;//buff读使能回到初始值
 											end
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b0)) //??????//??????//?????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b0)) //单步循环结束//单步执行结束//小循环跳转
 								            begin
-											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//???????
-												s_cnt_runtime_list    <= 'd1                   ;//?????????????
-												s_cnt_repeat_list     <= 'd1                   ;//???????????
-												s_cnt_loop_list       <= s_cnt_loop_list + 'h1 ;//?????+1
-												o_curstepnum_list     <= s_latch_goto_list     ;//buff?????goto??
-												s_rdbuff_enb          <= 1'b1                  ;//buff?????
+											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//总循环计数保持
+												s_cnt_runtime_list    <= 'd1                   ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= 'd1                   ;//单步循环计数回到初始值
+												s_cnt_loop_list       <= s_cnt_loop_list + 'h1 ;//小循环计数+1
+												o_curstepnum_list     <= s_latch_goto_list     ;//buff地址跳转到goto地址
+												s_rdbuff_enb          <= 1'b1                  ;//buff读使能有效
 											end
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b0)) //??????//???????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b0)) //单步循环结束//单步执行没结束
 											begin
-											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//???????
-												s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//????????+1
-												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//????????
-												s_cnt_loop_list       <= s_cnt_loop_list       ;//???????
-								                o_curstepnum_list     <= o_curstepnum_list        ;//buff????
-												s_rdbuff_enb          <= 1'b0                  ;//buff??????
+											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//总循环计数保持
+												s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//单步执行时间计数+1
+												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//单步循环计数保持
+												s_cnt_loop_list       <= s_cnt_loop_list       ;//小循环计数保持
+								                o_curstepnum_list     <= o_curstepnum_list        ;//buff地址保持
+												s_rdbuff_enb          <= 1'b0                  ;//buff读使能不有效
 										    end
-										else if ((w_done_repeat_list == 1'b0) && (w_done_runus_list == 1'b1)) //???????//??????
+										else if ((w_done_repeat_list == 1'b0) && (w_done_runus_list == 1'b1)) //单步循环没结束//单步执行结束
 											begin
-											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//???????
-												s_cnt_runtime_list    <= 'd1                   ;//?????????????
-												s_cnt_repeat_list     <= s_cnt_repeat_list + 'h1 ;//????????+1
-												s_cnt_loop_list       <= s_cnt_loop_list       ;//???????												
-								                o_curstepnum_list     <= o_curstepnum_list        ;//buff????
-												s_rdbuff_enb          <= 1'b0                  ;//buff??????
+											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//总循环计数保持
+												s_cnt_runtime_list    <= 'd1                   ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= s_cnt_repeat_list + 'h1 ;//单步循环计数保持+1
+												s_cnt_loop_list       <= s_cnt_loop_list       ;//小循环计数保持												
+								                o_curstepnum_list     <= o_curstepnum_list        ;//buff地址保持
+												s_rdbuff_enb          <= 1'b0                  ;//buff读使能不有效
 										    end
-										else //???????//???????
+										else //单步循环没结束//单步执行没结束
 								            begin
-								                s_cnt_total_loop_list <= s_cnt_total_loop_list ;//???????
-												s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//????????+1												
-												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//????????
-												s_cnt_loop_list       <= s_cnt_loop_list       ;//???????
-												o_curstepnum_list     <= o_curstepnum_list        ;//buff????
-												s_rdbuff_enb          <= 1'b0                  ;//buff??????
+								                s_cnt_total_loop_list <= s_cnt_total_loop_list ;//总循环计数保持
+												s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//单步执行时间计数+1												
+												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//单步循环计数保持
+												s_cnt_loop_list       <= s_cnt_loop_list       ;//小循环计数保持
+												o_curstepnum_list     <= o_curstepnum_list        ;//buff地址保持
+												s_rdbuff_enb          <= 1'b0                  ;//buff读使能不有效
 										    end
 								    end
-								else if ((o_curstepnum_list >= s_latch_total_stepnum_list) && (w_done_total_loop_list == 0)) //??????step//???????
+								else if ((o_curstepnum_list >= s_latch_total_stepnum_list) && (w_done_total_loop_list == 0)) //列表最后一个step//总循环没有结束
 								    begin
-								        if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (s_latch_goto_list == 'hffff)) //??????//??????//????
+								        if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (s_latch_goto_list == 'hffff)) //单步循环结束//单步执行结束//无小循环
 								            begin
-											    s_cnt_total_loop_list <= s_cnt_total_loop_list + 'h1 ;//?????+1
-												s_cnt_runtime_list    <= 'd1                         ;//?????????????
-												s_cnt_repeat_list     <= 'd1                         ;//???????????
-												s_cnt_loop_list       <= 'd1                         ;//??????????
-												o_curstepnum_list     <= 'h1                         ;//buff???????
-											    s_rdbuff_enb          <= 1'b1                        ;//buff?????
+											    s_cnt_total_loop_list <= s_cnt_total_loop_list + 'h1 ;//总循环计数+1
+												s_cnt_runtime_list    <= 'd1                         ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= 'd1                         ;//单步循环计数回到初始值
+												s_cnt_loop_list       <= 'd1                         ;//小循环计数回到初始值
+												o_curstepnum_list     <= 'h1                         ;//buff地址回到初始值
+											    s_rdbuff_enb          <= 1'b1                        ;//buff读使能有效
 											end
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b1)) //??????//??????//?????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b1)) //单步循环结束//单步执行结束//小循环结束
 								            begin
-											    s_cnt_total_loop_list <= s_cnt_total_loop_list + 'h1 ;//?????+1
-												s_cnt_runtime_list    <= 'd1                         ;//?????????????
-												s_cnt_repeat_list     <= 'd1                         ;//???????????
-												s_cnt_loop_list       <= 'd1                         ;//??????????
-												o_curstepnum_list     <= 'h1                         ;//buff???????
-											    s_rdbuff_enb          <= 1'b1                        ;//buff?????
+											    s_cnt_total_loop_list <= s_cnt_total_loop_list + 'h1 ;//总循环计数+1
+												s_cnt_runtime_list    <= 'd1                         ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= 'd1                         ;//单步循环计数回到初始值
+												s_cnt_loop_list       <= 'd1                         ;//小循环计数回到初始值
+												o_curstepnum_list     <= 'h1                         ;//buff地址回到初始值
+											    s_rdbuff_enb          <= 1'b1                        ;//buff读使能有效
 											end
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b0)) //??????//??????//?????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b0)) //单步循环结束//单步执行结束//小循环跳转
 								            begin
-											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//???????
-												s_cnt_runtime_list    <= 'd1                   ;//?????????????
-												s_cnt_repeat_list     <= 'd1                   ;//???????????
-												s_cnt_loop_list       <= s_cnt_loop_list + 'h1 ;//?????+1
-												o_curstepnum_list     <= s_latch_goto_list     ;//buff?????goto??
-												s_rdbuff_enb          <= 1'b1                  ;//buff?????
+											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//总循环计数保持
+												s_cnt_runtime_list    <= 'd1                   ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= 'd1                   ;//单步循环计数回到初始值
+												s_cnt_loop_list       <= s_cnt_loop_list + 'h1 ;//小循环计数+1
+												o_curstepnum_list     <= s_latch_goto_list     ;//buff地址跳转到goto地址
+												s_rdbuff_enb          <= 1'b1                  ;//buff读使能有效
 											end
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b0)) //??????//???????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b0)) //单步循环结束//单步执行没结束
 											begin
 											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//
-												s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//????????+1												
-												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//????????
-												s_cnt_loop_list       <= s_cnt_loop_list       ;//???????
+												s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//单步执行时间计数+1												
+												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//单步循环计数保持
+												s_cnt_loop_list       <= s_cnt_loop_list       ;//小循环计数保持
 								                o_curstepnum_list     <= o_curstepnum_list        ;//
 												s_rdbuff_enb          <= 1'b0                  ;//
 										    end
-										else if ((w_done_repeat_list == 1'b0) && (w_done_runus_list == 1'b1)) //???????//??????
+										else if ((w_done_repeat_list == 1'b0) && (w_done_runus_list == 1'b1)) //单步循环没结束//单步执行结束
 											begin
 											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//
-												s_cnt_runtime_list    <= 'd1                   ;//?????????????
-												s_cnt_repeat_list     <= s_cnt_repeat_list + 'h1 ;//????????+1
-												s_cnt_loop_list       <= s_cnt_loop_list       ;//???????			
+												s_cnt_runtime_list    <= 'd1                   ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= s_cnt_repeat_list + 'h1 ;//单步循环计数保持+1
+												s_cnt_loop_list       <= s_cnt_loop_list       ;//小循环计数保持			
 								                o_curstepnum_list     <= o_curstepnum_list        ;//
 												s_rdbuff_enb          <= 1'b0                  ;//
 										    end
-										else //???????//???????
+										else //单步循环没结束//单步执行没结束
 										    begin
 											    s_cnt_total_loop_list <= s_cnt_total_loop_list ;//
-												s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//????????+1												
-												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//????????
-												s_cnt_loop_list       <= s_cnt_loop_list       ;//???????
+												s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//单步执行时间计数+1												
+												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//单步循环计数保持
+												s_cnt_loop_list       <= s_cnt_loop_list       ;//小循环计数保持
 								                o_curstepnum_list     <= o_curstepnum_list         ;//
 												s_rdbuff_enb          <= 1'b0                   ;//
 											end
 								    end								
-								else  //????????step
+								else  //列表不是最后一个step
 								    begin
 								        s_cnt_total_loop_list <= s_cnt_total_loop_list ;
 																				
-										if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (s_latch_goto_list == 'hffff)) //??????//??????//????
+										if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (s_latch_goto_list == 'hffff)) //单步循环结束//单步执行结束//无小循环
 								            begin
-											    s_cnt_runtime_list    <= 'd1                  ;//?????????????
-												s_cnt_repeat_list     <= 'd1                  ;//???????????
-												s_cnt_loop_list       <= 'd1                  ;//??????????
-												o_curstepnum_list     <= o_curstepnum_list + 'h1 ;//buff??+1
-												s_rdbuff_enb          <= 1'b1                 ;//buff?????
+											    s_cnt_runtime_list    <= 'd1                  ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= 'd1                  ;//单步循环计数回到初始值
+												s_cnt_loop_list       <= 'd1                  ;//小循环计数回到初始值
+												o_curstepnum_list     <= o_curstepnum_list + 'h1 ;//buff地址+1
+												s_rdbuff_enb          <= 1'b1                 ;//buff读使能有效
 											end
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b1)) //??????//??????//?????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b1)) //单步循环结束//单步执行结束//小循环结束
 								            begin
-											    s_cnt_runtime_list    <= 'd1                  ;//?????????????
-												s_cnt_repeat_list     <= 'd1                  ;//???????????
-												s_cnt_loop_list       <= 'd1                  ;//??????????
-												o_curstepnum_list     <= o_curstepnum_list + 'h1 ;//buff??+1
-												s_rdbuff_enb          <= 1'b1                 ;//buff?????
+											    s_cnt_runtime_list    <= 'd1                  ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= 'd1                  ;//单步循环计数回到初始值
+												s_cnt_loop_list       <= 'd1                  ;//小循环计数回到初始值
+												o_curstepnum_list     <= o_curstepnum_list + 'h1 ;//buff地址+1
+												s_rdbuff_enb          <= 1'b1                 ;//buff读使能有效
 											end
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b0)) //??????//??????//?????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b0)) //单步循环结束//单步执行结束//小循环跳转
 								            begin
-											    s_cnt_runtime_list    <= 'd1                   ;//?????????????
-												s_cnt_repeat_list     <= 'd1                   ;//???????????
-												s_cnt_loop_list       <= s_cnt_loop_list + 'h1 ;//?????+1
-												o_curstepnum_list     <= s_latch_goto_list     ;//buff?????goto??
+											    s_cnt_runtime_list    <= 'd1                   ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= 'd1                   ;//单步循环计数回到初始值
+												s_cnt_loop_list       <= s_cnt_loop_list + 'h1 ;//小循环计数+1
+												o_curstepnum_list     <= s_latch_goto_list     ;//buff地址跳转到goto地址
 												s_rdbuff_enb          <= 1'b1                  ;//
 											end
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b0)) //??????//???????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b0)) //单步循环结束//单步执行没结束
 											begin											    
-								                s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//????????+1												
-												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//????????
-												s_cnt_loop_list       <= s_cnt_loop_list       ;//???????												
+								                s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//单步执行时间计数+1												
+												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//单步循环计数保持
+												s_cnt_loop_list       <= s_cnt_loop_list       ;//小循环计数保持												
 												o_curstepnum_list     <= o_curstepnum_list        ;//
 												s_rdbuff_enb          <= 1'b0                  ;//
 										    end
-										else if ((w_done_repeat_list == 1'b0) && (w_done_runus_list == 1'b1)) //???????//??????
+										else if ((w_done_repeat_list == 1'b0) && (w_done_runus_list == 1'b1)) //单步循环没结束//单步执行结束
 											begin											    
-								                s_cnt_runtime_list    <= 'd1                   ;//?????????????
-												s_cnt_repeat_list     <= s_cnt_repeat_list + 'h1 ;//????????+1
-												s_cnt_loop_list       <= s_cnt_loop_list       ;//???????	
+								                s_cnt_runtime_list    <= 'd1                   ;//单步执行时间计数回到初始值
+												s_cnt_repeat_list     <= s_cnt_repeat_list + 'h1 ;//单步循环计数保持+1
+												s_cnt_loop_list       <= s_cnt_loop_list       ;//小循环计数保持	
 												o_curstepnum_list     <= o_curstepnum_list        ;//
 												s_rdbuff_enb          <= 1'b0                  ;//
 										    end
-										else //???????//???????
+										else //单步循环没结束//单步执行没结束
 								            begin
-								                s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//????????+1
-												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//????????
-												s_cnt_loop_list       <= s_cnt_loop_list       ;//???????
+								                s_cnt_runtime_list    <= s_cnt_runtime_list + 'h1 ;//单步执行时间计数+1
+												s_cnt_repeat_list     <= s_cnt_repeat_list     ;//单步循环计数保持
+												s_cnt_loop_list       <= s_cnt_loop_list       ;//小循环计数保持
 												o_curstepnum_list     <= o_curstepnum_list        ;//
 												s_rdbuff_enb          <= 1'b0                  ;//
 										    end
 								    end
 									
-								if ((o_curstepnum_list >= s_latch_total_stepnum_list) && (w_done_total_loop_list == 1)) //??????step//?????
+								if ((o_curstepnum_list >= s_latch_total_stepnum_list) && (w_done_total_loop_list == 1)) //列表最后一个step//总循环结束
 								    begin
-										if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (s_latch_goto_list == 'hffff)) //??????//??????//????
+										if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (s_latch_goto_list == 'hffff)) //单步循环结束//单步执行结束//无小循环
 								            o_cpl_list <= 1 ;
-								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b1)) //??????//??????//?????
+								        else if ((w_done_repeat_list == 1'b1) && (w_done_runus_list == 1'b1) && (w_done_loop_list == 1'b1)) //单步循环结束//单步执行结束//小循环结束
 								            o_cpl_list <= 1 ;
 										else 
 								            o_cpl_list <= 0 ;
@@ -2843,11 +2843,11 @@ begin
 									begin o_pass_TOCP <= 0 ; o_fail_TOCP <= 0 ; o_status_TOCP <= 0 ; o_curTarget_TOCP <= o_curTarget_TOCP ; end
 								else if (i_U_rt >= i_pro_Volt_TOCP)
 								    begin o_pass_TOCP <= 0 ; o_fail_TOCP <= 0 ; o_status_TOCP <= 1 ; o_curTarget_TOCP <= o_curTarget_TOCP ; end
-								else if ((i_U_rt < i_pro_Volt_TOCP) && (i_I_rt < i_over_Curr_MAX_TOCP) && (i_I_rt >= i_over_Curr_MIN_TOCP)) //??OCP???????
+								else if ((i_U_rt < i_pro_Volt_TOCP) && (i_I_rt < i_over_Curr_MAX_TOCP) && (i_I_rt >= i_over_Curr_MIN_TOCP)) //发生OCP且电流在范围内
 								    begin o_pass_TOCP <= 1 ; o_fail_TOCP <= 0 ; o_status_TOCP <= 8 ; o_curTarget_TOCP <= o_CC_target ; end	
-								else if ((i_U_rt < i_pro_Volt_TOCP) && (i_I_rt < i_over_Curr_MIN_TOCP))//??OCP????????
+								else if ((i_U_rt < i_pro_Volt_TOCP) && (i_I_rt < i_over_Curr_MIN_TOCP))//发生OCP且电流不在范围内
 								    begin o_pass_TOCP <= 0 ; o_fail_TOCP <= 1 ; o_status_TOCP <= 2 ; o_curTarget_TOCP <= o_CC_target ; end	
-								else if ((i_U_rt < i_pro_Volt_TOCP) && (i_I_rt >= i_over_Curr_MAX_TOCP)) //??OCP????????
+								else if ((i_U_rt < i_pro_Volt_TOCP) && (i_I_rt >= i_over_Curr_MAX_TOCP)) //发生OCP且电流不在范围内
 								    begin o_pass_TOCP <= 0 ; o_fail_TOCP <= 1 ; o_status_TOCP <= 4 ; o_curTarget_TOCP <= o_CC_target ; end	
 								else 
 									begin o_pass_TOCP <= o_pass_TOCP ; o_fail_TOCP <= o_fail_TOCP ; o_status_TOCP <= o_status_TOCP ; o_curTarget_TOCP <= o_curTarget_TOCP ; end
@@ -2855,7 +2855,7 @@ begin
 								if (s_init_TOCP == 1)
 								    o_cpl_TOCP <= 0 ;
 								else if (((w_done_steptime_TOCP == 1) && (o_CC_target == i_stop_Curr_TOCP)) || (i_U_rt < i_pro_Volt_TOCP))
-								    o_cpl_TOCP <= 1 ;// ????ocp?????OCP??
+								    o_cpl_TOCP <= 1 ;// 或者触发ocp就立刻完成OCP操作
 								else
 								    o_cpl_TOCP <= o_cpl_TOCP ;
 	                        end
@@ -2899,11 +2899,11 @@ begin
 									begin o_pass_TOPP <= 0 ; o_fail_TOPP <= 0 ; o_status_TOPP <= 0 ; o_curTarget_TOPP <= o_curTarget_TOPP ; end
 								else if (i_U_rt >= i_pro_Volt_TOPP)
 								    begin o_pass_TOPP <= 0 ; o_fail_TOPP <= 0 ; o_status_TOPP <= 1 ; o_curTarget_TOPP <= o_curTarget_TOPP ; end
-								else if ((i_U_rt < i_pro_Volt_TOPP) && (i_P_rt < i_over_Power_MAX_TOPP) && (i_P_rt >= i_over_Power_MIN_TOPP)) //??OPP???????
+								else if ((i_U_rt < i_pro_Volt_TOPP) && (i_P_rt < i_over_Power_MAX_TOPP) && (i_P_rt >= i_over_Power_MIN_TOPP)) //发生OPP且功率在范围内
 								    begin o_pass_TOPP <= 1 ; o_fail_TOPP <= 0 ; o_status_TOPP <= 8 ; o_curTarget_TOPP <= o_CP_target ; end	
-								else if ((i_U_rt < i_pro_Volt_TOPP) && (i_P_rt < i_over_Power_MIN_TOPP)) //??OPP????????
+								else if ((i_U_rt < i_pro_Volt_TOPP) && (i_P_rt < i_over_Power_MIN_TOPP)) //发生OPP且功率不在范围内
 								    begin o_pass_TOPP <= 0 ; o_fail_TOPP <= 1 ; o_status_TOPP <= 2 ; o_curTarget_TOPP <= o_CP_target ; end
-								else if ((i_U_rt < i_pro_Volt_TOPP) && (i_P_rt >= i_over_Power_MAX_TOPP)) //??OPP????????
+								else if ((i_U_rt < i_pro_Volt_TOPP) && (i_P_rt >= i_over_Power_MAX_TOPP)) //发生OPP且功率不在范围内
 								    begin o_pass_TOPP <= 0 ; o_fail_TOPP <= 1 ; o_status_TOPP <= 4 ; o_curTarget_TOPP <= o_CP_target ; end	
 								else	
 									begin o_pass_TOPP <= o_pass_TOPP ; o_fail_TOPP <= o_fail_TOPP ; o_status_TOPP <= o_status_TOPP ; o_curTarget_TOPP <= o_curTarget_TOPP ; end
@@ -2911,7 +2911,7 @@ begin
 								if (s_init_TOPP == 1)
 								    o_cpl_TOPP <= 0 ;								
 								else if (((w_done_steptime_TOPP == 1) && (o_CP_target == i_stop_Power_TOPP)) || (i_U_rt < i_pro_Volt_TOPP))
-								    o_cpl_TOPP <= 1 ;// OPP????
+								    o_cpl_TOPP <= 1 ;// OPP立刻停止
 								else
 								    o_cpl_TOPP <= o_cpl_TOPP ;
 	                        end
@@ -2955,13 +2955,13 @@ begin
 	        					    begin
                                         if (s_init_CC == 1)
 										    o_cpl_BATT <= 0 ;
-										else if (i_U_rt < i_proV_BT_Stop) //??????
+										else if (i_U_rt < i_proV_BT_Stop) //电压保护截止
 	        							    o_cpl_BATT <= 1 ;
-										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //????
+										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //电压截止
 										    o_cpl_BATT <= 1 ;
-										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //????
+										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //时间截止
 										    o_cpl_BATT <= 1 ;
-										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //????
+										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //容量截止
 										    o_cpl_BATT <= 1 ;
 										else
                                             o_cpl_BATT <= o_cpl_BATT ;
@@ -2970,13 +2970,13 @@ begin
 	        					    begin											
 										if (s_init_CP == 1)
 										    o_cpl_BATT <= 0 ;
-										else if (i_U_rt < i_proV_BT_Stop) //??????
+										else if (i_U_rt < i_proV_BT_Stop) //电压保护截止
 	        							    o_cpl_BATT <= 1 ;
-										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //????
+										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //电压截止
 										    o_cpl_BATT <= 1 ;
-										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //????
+										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //时间截止
 										    o_cpl_BATT <= 1 ;
-										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //????
+										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //容量截止
 										    o_cpl_BATT <= 1 ;
 										else
                                             o_cpl_BATT <= o_cpl_BATT ;
@@ -2985,13 +2985,13 @@ begin
 	        					    begin											
 										if (s_init_CR == 1)
 										    o_cpl_BATT <= 0 ;
-										else if (i_U_rt < i_proV_BT_Stop) //??????
+										else if (i_U_rt < i_proV_BT_Stop) //电压保护截止
 	        							    o_cpl_BATT <= 1 ;
-										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //????
+										else if ((CurWorkMode_bat[4] == 1) && (i_U_rt < i_offV_BT_Stop)) //电压截止
 										    o_cpl_BATT <= 1 ;
-										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //????
+										else if ((CurWorkMode_bat[5] == 1) && (i_BAT_time >= i_offT_BT_Stop)) //时间截止
 										    o_cpl_BATT <= 1 ;
-										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //????
+										else if ((CurWorkMode_bat[6] == 1) && (i_BAT_cap >= i_offC_BT_Stop)) //容量截止
 										    o_cpl_BATT <= 1 ;
 										else
                                             o_cpl_BATT <= o_cpl_BATT ;
@@ -3012,7 +3012,7 @@ end
 //  output
 //----------------------------------------------------------------------
 
-//DAC??
+//DAC控制
 // output  reg                             o_outa_enb        =0 ,//
 // output  reg     [15:0]                  o_outa_data       =0 ,//CELL_PROG_DA
 // output  reg                             o_outb_enb        =0 ,//
@@ -3025,31 +3025,31 @@ begin
             s_hardCV_1r <= i_hardCV_ON ;//
             s_hardCV_2r <= s_hardCV_1r ;//
 			
-			if ((w_modechange == 1) && (s_hardCV_1r == 1) && (CurWorkMode[3] == 1))//?????CV???CV??
+			if ((w_modechange == 1) && (s_hardCV_1r == 1) && (CurWorkMode[3] == 1))//模式切换到CV且硬件CV打开
 			    begin
 				    o_outa_enb   <= 1                 ;//
-			        o_outa_data  <= {1'B1,{15{1'B1}}} ;//???MAX?
+			        o_outa_data  <= {1'B1,{15{1'B1}}} ;//无符号MAX值
 			        o_outb_enb   <= 1                 ;
 			        o_outb_data  <= {1'B1,{15{1'B1}}} ;
 				end
-			else if ((w_modechange == 1) && (CurWorkMode[3] == 0))//??????CV
+			else if ((w_modechange == 1) && (CurWorkMode[3] == 0))//模式切换到非CV
 			    begin
 				    o_outa_enb   <= 1                 ;//
-			        o_outa_data  <= {1'B0,{15{1'B0}}} ;//???MAX?
+			        o_outa_data  <= {1'B0,{15{1'B0}}} ;//无符号MAX值
 			        o_outb_enb   <= 1                 ;
 			        o_outb_data  <= {1'B1,{15{1'B1}}} ;
 				end
-			else if ((s_hardCV_1r == 1) && (s_hardCV_2r == 0) && (CurWorkMode[3] == 1))//CV???????CV
+			else if ((s_hardCV_1r == 1) && (s_hardCV_2r == 0) && (CurWorkMode[3] == 1))//CV模式下切换硬件CV
 			    begin
 				    o_outa_enb   <= 1                 ;//
-			        o_outa_data  <= {1'B1,{15{1'B1}}} ;//???MAX?
+			        o_outa_data  <= {1'B1,{15{1'B1}}} ;//无符号MAX值
 			        o_outb_enb   <= 1                 ;
 			        o_outb_data  <= {1'B1,{15{1'B1}}} ;
 				end
-			else if ((s_hardCV_1r == 0) && (s_hardCV_2r == 1) && (CurWorkMode[3] == 1))//CV???????CV
+			else if ((s_hardCV_1r == 0) && (s_hardCV_2r == 1) && (CurWorkMode[3] == 1))//CV模式下切换软件CV
 			    begin
 				    o_outa_enb   <= 1                 ;//
-			        o_outa_data  <= {1'B0,{15{1'B0}}} ;//???MAX?
+			        o_outa_data  <= {1'B0,{15{1'B0}}} ;//无符号MAX值
 			        o_outb_enb   <= 1                 ;
 			        o_outb_data  <= {1'B1,{15{1'B1}}} ;
 				end
