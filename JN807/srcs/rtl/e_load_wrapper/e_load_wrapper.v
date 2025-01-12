@@ -230,7 +230,7 @@ module e_load_wrapper #(
     wire               [32-1: 0]    TOCP_Von_set_L      ;
     wire               [32-1: 0]    TOCP_Von_set_H      ;
     wire               [32-1: 0]    TOCP_Istart_set_L   ;
-    wire               [32-1: 0]    TOCP_Istartl_set_H  ;
+    wire               [32-1: 0]    TOCP_Istart_set_H   ;
     wire               [32-1: 0]    TOCP_Icut_set_L     ;
     wire               [32-1: 0]    TOCP_Icut_set_H     ;
     wire               [32-1: 0]    TOCP_Istep_set      ;
@@ -391,6 +391,27 @@ module e_load_wrapper #(
     reg                             vop_posedge_r1,vop_posedge_r2  ;//1 error . 0 normal .负电压检测
 
     wire                            cv_hard_lock_off_en  ;
+
+    //list
+    wire                            Save_step_ON        ;
+    wire               [  31: 0]    Value               ;
+    wire               [  31: 0]    Tstep               ;
+    wire               [   9: 0]    list_buff_rd_addr   ;
+    wire               [  15: 0]    cur_Mode            ;
+    wire               [  31: 0]    cur_Value           ;
+    wire               [  31: 0]    cur_Tstep           ;
+    wire               [  15: 0]    cur_Repeat          ;
+    wire               [  15: 0]    cur_Goto            ;
+    wire               [  15: 0]    cur_Loops           ;
+
+    wire               [  15: 0]    current_workmod     ;
+    //TOCP
+    wire               [32-1: 0]    TOCP_Von_set        ;
+    wire               [32-1: 0]    TOCP_Istart_set     ;
+    wire               [32-1: 0]    TOCP_Icut_set       ;
+    wire               [32-1: 0]    TOCP_Vcut_set       ;
+    wire               [32-1: 0]    TOCP_Imin_set       ;
+    wire               [32-1: 0]    TOCP_Imax_set       ;
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
 // assigns
@@ -409,7 +430,20 @@ module e_load_wrapper #(
     assign                          vmod_l_sw_o        = ~U_gear_H_ON;
     assign                          vsense_l_sw_o      = ~U_gear_H_ON;
     assign                          vin_select_o       = SENSE_ON;
+    //list
+    assign                          Save_step_ON       = (Save_step == 16'h5a5a);
 
+    assign                          Value              = {Value_H[15:0],Value_L[15:0]};
+    assign                          Tstep              = {Tstep_H[15:0],Tstep_L[15:0]};
+    //TOCP
+    assign                          TOCP_Von_set       = {TOCP_Von_set_H[15:0],TOCP_Von_set_L[15:0]};
+    assign                          TOCP_Istart_set    = {TOCP_Istart_set_H[15:0],TOCP_Istart_set_L[15:0]};
+    assign                          TOCP_Icut_set      = {TOCP_Icut_set_H[15:0],TOCP_Icut_set_L[15:0]};
+    assign                          TOCP_Vcut_set      = {TOCP_Vcut_set_H[15:0],TOCP_Vcut_set_L[15:0]};
+    assign                          TOCP_Imin_set      = {TOCP_Imin_set_H[15:0],TOCP_Imin_set_L[15:0]};
+    assign                          TOCP_Imax_set      = {TOCP_Imax_set_H[15:0],TOCP_Imax_set_L[15:0]};
+
+    //static CC 和dynamic CC
     assign                          Iset               = {Iset_H[15:0],Iset_L[15:0]};
     assign                          Vset               = {Vset_H[15:0],Vset_L[15:0]};
     assign                          Pset               = {Pset_H[15:0],Pset_L[15:0]};
@@ -709,6 +743,7 @@ u_main_ctrl_pull_load(
     .Von_Latch_ON_i                 (Von_Latch_ON       ),
     .Workmod_i                      (Workmod            ),
     .Func_i                         (Func               ),
+    .current_workmod_o              (current_workmod    ),
     .global_1us_flag_o              (global_1us_flag    ),
     .Von_i                          (Von                ),// 启动电压
     .Voff_i                         (Voff               ),// 截至电压
@@ -744,6 +779,20 @@ u_main_ctrl_pull_load(
     .pull_Rslew_o                   (pull_Rslew         ),
     .pull_Fslew_o                   (pull_Fslew         ),
     .pull_on_doing_i                (pull_on_doing      ),
+    //DYN
+    .Dyn_trig_mode_i                (Dyn_trig_mode      ),
+    .Dyn_trig_source_i              (Dyn_trig_source    ),
+    .Dyn_trig_gen_i                 (Dyn_trig_gen       ),
+//list参数
+    .Step_i                         (Step               ),// 步数序列号，从1开始，0存以上两个参数
+    .Mode_i                         (Mode               ),// 工作模式 [CC(0x5a5a)、CV(0xa5a5)、CP(0x5a00)、CR(0x005a)]
+    .Value_i                        (Value              ),// 拉载值
+    .Tstep_i                        (Tstep              ),// uS//单步执行时间
+    .Repeat_i                       (Repeat             ),
+    .Goto_i                         (Goto               ),// 小循环跳转目的地,1-999
+    .Loops_i                        (Loops              ),// 小循环次数,1-65535
+    .Save_step_ON_i                 (Save_step_ON       ),// 锁存参数
+//实时参数
     .U_i                            (U_cali             ),// mV 实时值，有符号数
     .I_i                            (I_cali             ),// mV 实时值，有符号数
     .U_abs_i                        (U_cali_abs         ),// mV 实时值
@@ -768,7 +817,7 @@ u_pull_load_wrapper(
 //software CV
     .CV_mode_hard_ON_i              (CV_mode_hard_ON    ),
     .Von_i                          (Von                ),// 开启电压mV
-    .Workmod_i                      (Workmod            ),
+    .Workmod_i                      (current_workmod    ),
     .global_1us_flag_i              (global_1us_flag    ),
 
     .pull_on_i                      (pull_on            ),
@@ -841,6 +890,7 @@ u_alarm_wrapper(
     .Umod_inv_alarm_o               (Umod_inv_alarm     ),
     .Usense_inv_alarm_o             (Usense_inv_alarm   ) 
 );
+
 // ********************************************************************************** // 
 //---------------------------------------------------------------------
 // 用于显示电压和电流
@@ -999,7 +1049,7 @@ jn807_reg_map_cfg u_jn807_reg_map_cfg(
     .TOCP_Von_set_L                 (TOCP_Von_set_L     ),// output slv_reg0C0 TOCP_Von_set_L [32-1:0]
     .TOCP_Von_set_H                 (TOCP_Von_set_H     ),// output slv_reg0C1 TOCP_Von_set_H [32-1:0]
     .TOCP_Istart_set_L              (TOCP_Istart_set_L  ),// output slv_reg0C2 TOCP_Istart_set_L [32-1:0]
-    .TOCP_Istartl_set_H             (TOCP_Istartl_set_H ),// output slv_reg0C3 TOCP_Istartl_set_H [32-1:0]
+    .TOCP_Istart_set_H              (TOCP_Istart_set_H  ),// output slv_reg0C3 TOCP_Istart_set_H [32-1:0]
     .TOCP_Icut_set_L                (TOCP_Icut_set_L    ),// output slv_reg0C4 TOCP_Icut_set_L [32-1:0]
     .TOCP_Icut_set_H                (TOCP_Icut_set_H    ),// output slv_reg0C5 TOCP_Icut_set_H [32-1:0]
     .TOCP_Istep_set                 (TOCP_Istep_set     ),// output slv_reg0C6 TOCP_Istep_set [32-1:0]
@@ -1148,7 +1198,7 @@ jn807_reg_map_cfg u_jn807_reg_map_cfg(
     .rd_TOCP_Von_set_L              (TOCP_Von_set_L     ),// input rd_slv_reg0C0 rd_TOCP_Von_set_L [32-1:0]
     .rd_TOCP_Von_set_H              (TOCP_Von_set_H     ),// input rd_slv_reg0C1 rd_TOCP_Von_set_H [32-1:0]
     .rd_TOCP_Istart_set_L           (TOCP_Istart_set_L  ),// input rd_slv_reg0C2 rd_TOCP_Istart_set_L [32-1:0]
-    .rd_TOCP_Istartl_set_H          (TOCP_Istartl_set_H ),// input rd_slv_reg0C3 rd_TOCP_Istartl_set_H [32-1:0]
+    .rd_TOCP_Istartl_set_H          (TOCP_Istart_set_H  ),// input rd_slv_reg0C3 rd_TOCP_Istartl_set_H [32-1:0]
     .rd_TOCP_Icut_set_L             (TOCP_Icut_set_L    ),// input rd_slv_reg0C4 rd_TOCP_Icut_set_L [32-1:0]
     .rd_TOCP_Icut_set_H             (TOCP_Icut_set_H    ),// input rd_slv_reg0C5 rd_TOCP_Icut_set_H [32-1:0]
     .rd_TOCP_Istep_set              (TOCP_Istep_set     ),// input rd_slv_reg0C6 rd_TOCP_Istep_set [32-1:0]

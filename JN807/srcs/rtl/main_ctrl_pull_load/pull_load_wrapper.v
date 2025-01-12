@@ -61,7 +61,7 @@ module pull_load_wrapper #(
     input  wire                     cv_limit_trig_i     ,//1:normal 0:error 硬件CV时电流控制量PROG大于CV_LIMIT
     output wire                     hardware_lock_off_en_o,
     output wire                     cc_cv_select_o      ,//1:CELL PROG DA 0:CV HARDWARE LOOP
-    output reg                      cv_limit_select_o   ,//1:CV LIMIT DA 0:CV LIMIT PROG
+    output wire                     cv_limit_select_o   ,//1:CV LIMIT DA 0:CV LIMIT PROG
 
     output reg                      dac_data_valid_o    ,
     output reg         [  15: 0]    dac_data_o          ,
